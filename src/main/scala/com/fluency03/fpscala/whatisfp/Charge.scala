@@ -9,8 +9,7 @@ case class Charge (cc: CreditCard, amount: Double) {
   def combine (other: Charge): Charge =
     if (cc == other.cc) {
       Charge(cc, amount + other.amount)
-    }
-    else {
+    } else {
       throw new IllegalArgumentException("Can't combine charges to different cards")
     }
 }

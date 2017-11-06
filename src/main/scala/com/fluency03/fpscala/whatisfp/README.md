@@ -1,7 +1,7 @@
 # CHAPTER 1: What is functional programming?
 
 
-- Construct our programs using only pure functions - in other words, functions that have no side effects.
+- Construct our programs using only **pure functions** - in other words, functions that have no **side effects**.
 - Side effects:
   - Modifying a variable
   - Modifying a data structure in place
