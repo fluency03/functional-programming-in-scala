@@ -24,6 +24,9 @@ object MyModule {
   }
 
   def fib(n: Int): Int = {
+    if (n <= 0)
+      throw new IllegalArgumentException("Input number should be larger than zero.")
+
     @annotation.tailrec
     def fibTailRec(n: Int, prev: Int, cur: Int): Int =
       if (n == 0) prev
@@ -42,11 +45,11 @@ object MyModule {
     msg.format(name, n, f(n))
   }
 
-  def main(args: Array[String]): Unit =
-    println(formatAbs(-42))
-    println(formatFactorial(7))
-    println(formatResult("absolute value", -42, abs))
-    println(formatResult("factorial", 7, factorial))
+//  def main(args: Array[String]): Unit =
+//    println(formatAbs(-42))
+//    println(formatFactorial(7))
+//    println(formatResult("absolute value", -42, abs))
+//    println(formatResult("factorial", 7, factorial))
 
 }
 
@@ -88,7 +91,6 @@ object PolymorphicFunctions {
 
   def curry[A,B,C](f: (A, B) => C): A => (B => C) =
     (a: A) => (b: B) => f(a, b)
-
 
   def uncurry[A,B,C](f: A => B => C): (A, B) => C =
     (a: A, b: B) => f(a)(b)
