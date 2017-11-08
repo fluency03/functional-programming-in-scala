@@ -15,7 +15,7 @@
   - It demands a special policy or calling convention of callers — proper use of the function would require that callers do something other than call mean and make use of the result. Giving functions special policies like this makes it difficult to pass them to higher-order functions, which must treat all arguments uniformly.
 - Why not provide fallback function?
   - It requires that immediate callers have direct knowledge of how to handle the undefined case and limits them to the returning type. What if mean is called as part of a larger computation and we’d like to abort that computation if mean is undefined? Or perhaps we’d like to take some completely different branch in the larger computation in this case? Simply passing an fallback parameter doesn’t give us this freedom.
-
+- `Option` has two cases: it can be defined, in which case it will be a `Some`, or it can be undefined, in which case it will be `None`.
 
 
 
