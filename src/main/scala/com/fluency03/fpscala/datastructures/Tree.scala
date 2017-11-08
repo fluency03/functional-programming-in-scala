@@ -66,5 +66,5 @@ object Tree {
   */
 //  def mapByFold[A, B](t: Tree[A])(f: A => B): Tree[B] =
 //    fold(t)(a => Leaf(f(a)))(Branch(_,_))
-  
+
 }
