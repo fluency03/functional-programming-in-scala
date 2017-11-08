@@ -6,5 +6,5 @@ class PolymorphicFunctionsTest extends FlatSpec {
 
 
 
-  
+
 }
