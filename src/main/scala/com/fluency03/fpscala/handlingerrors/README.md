@@ -16,10 +16,10 @@
 - Why not provide fallback function?
   - It requires that immediate callers have direct knowledge of how to handle the undefined case and limits them to the returning type. What if mean is called as part of a larger computation and we’d like to abort that computation if mean is undefined? Or perhaps we’d like to take some completely different branch in the larger computation in this case? Simply passing an fallback parameter doesn’t give us this freedom.
 - `Option` has two cases: it can be defined, in which case it will be a `Some`, or it can be undefined, in which case it will be `None`.
-
-
-
-
+- A common idiom is to do `o.getOrElse(throw new Exception("FAIL"))` to convert the `None` case of an `Option` back to an exception.
+- The general rule of thumb is that we use exceptions only if no reasonable program would ever catch the exception; if for some callers the exception might be a recoverable error, we use `Option` (or `Either`) to give them flexibility.
+- Since `Option[A]` is a different type than `A`, and the compiler won’t let us forget to explicitly defer or handle the possibility of `None`.
+- Since *lifting* functions is so common in Scala, Scala provides a syntactic construct called the *for-comprehension* that it expands automatically to a series of `flatMap` and `map` calls.
 
 
 
