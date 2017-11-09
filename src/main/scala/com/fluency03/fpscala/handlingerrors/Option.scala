@@ -1,7 +1,5 @@
 package com.fluency03.fpscala.handlingerrors
 
-import scala.util.Try
-
 sealed trait Option[+A] {
   def map[B](f: A => B): Option[B] = this match {
     case None => None
@@ -122,10 +120,5 @@ object Option {
 
   def sequenceViaTraverse[A](a: List[Option[A]]): Option[List[A]] =
     traverse(a)(x => x)
-
-
-
-
-
 
 }
