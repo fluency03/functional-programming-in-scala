@@ -6,7 +6,15 @@ Remarks and Code for the Book Functional Programming in Scala.
 - [CHAPTER 2: Getting started with functional programming in Scala](./src/main/scala/com/fluency03/fpscala/gettingstarted)
 - [CHAPTER 3: Functional data structures](./src/main/scala/com/fluency03/fpscala/datastructures)
 - [CHAPTER 4: Handling errors without exceptions](./src/main/scala/com/fluency03/fpscala/handlingerrors)
-- [CHAPTER 5: ](./src/main/scala/com/fluency03/fpscala/laziness)
+- [CHAPTER 5: Strictness and laziness](./src/main/scala/com/fluency03/fpscala/laziness)
+
+
+
+
+
+Reference: [fpinscala](https://github.com/fpinscala/fpinscala/)
+
+
 
 
 

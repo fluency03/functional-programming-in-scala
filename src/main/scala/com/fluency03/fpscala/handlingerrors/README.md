@@ -1,4 +1,4 @@
-# CHAPTER 4 Handling errors without exceptions
+# CHAPTER 4: Handling errors without exceptions
 
 - Throwing exceptions is a side effect.
 - Exceptions break referential transparency.
