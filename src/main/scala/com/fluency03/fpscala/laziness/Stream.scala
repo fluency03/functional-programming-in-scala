@@ -118,32 +118,41 @@ sealed trait Stream[+A] {
       case _ => None
     }
 
-  def zipAll[B](s2: Stream[B]): Stream[(Option[A], Option[B])] = ???
+  def zipAll[B](s2: Stream[B]): Stream[(Option[A], Option[B])] =
+    unfold((this, s2)) {
+      case (Empty, Empty) => None
+      case (Cons(h, t), Empty) => Some(((Some(h()), Option.empty[B]), (t(), empty[B])))
+      case (Empty, Cons(h, t)) => Some(((Option.empty[A], Some(h())), (empty[A], t())))
+      case (Cons(h1, t1), Cons(h2, t2)) => Some(((Some(h1()), Some(h2())), (t1(), t2())))
+    }
 
+  def startsWith[A](s: Stream[A]): Boolean =
+    zipWith(s)((a, b) => a == b).forAll(bo => bo)
 
+  def tails: Stream[Stream[A]] =
+    unfold(this) {
+      case Empty => None
+      case s => Some((s, s drop 1))
+    } append Stream(empty)
 
-
-  def startsWith[A](s: Stream[A]): Boolean = ???
-
-
-
-
-  def tails: Stream[Stream[A]] = ???
-
-
+//  def tails: Stream[Stream[A]] =
+//    unfold(this) {
+//      case Cons(h, t) => Some((this, t()))
+//      case _ => None
+//    } append Stream(empty)
 
   def hasSubsequence[A](s: Stream[A]): Boolean =
     tails exists (_ startsWith s)
 
+  def scanRight[B](z: B)(f: (A, => B) => B): Stream[B] =
+    foldRight((z, Stream(z)))((a, p0) => {
+      // p0 is passed by-name and used in by-name args in f and cons. So use lazy val to ensure only one evaluation...
+      lazy val p1 = p0
+      val b2 = f(a, p1._1)
+      (b2, cons(b2, p1._2))
+    })._2
 
 
-  def scanRight[B](z: B)(f: (A, => B) => B): Stream[B] = ???
-
-
-
-
-
-  
 }
 
 case object Empty extends Stream[Nothing]
