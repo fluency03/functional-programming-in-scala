@@ -93,12 +93,57 @@ sealed trait Stream[+A] {
   def find(p: A => Boolean): Option[A] =
     filter(p).headOption
 
+  def mapByUnfold[B](f: A => B): Stream[B] =
+    unfold(this)({
+      case Cons(h, t) => Some((f(h()), t()))
+      case _ => None
+    })
+
+  def takeByUnfold(n: Int): Stream[A] =
+    unfold((this, n)) {
+      case (Cons(h, t), 1) => Some((h(), (empty, 0)))
+      case (Cons(h, t), ni) if ni > 1 => Some((h(), (t(), ni - 1)))
+      case _ => None
+    }
+
+  def takeWhileByUnfold(f: A => Boolean): Stream[A] =
+    unfold(this) {
+      case Cons(h, t) if f(h()) => Some((h(), t()))
+      case _ => None
+    }
+
+  def zipWith[B, C](s2: Stream[B])(f: (A, B) => C): Stream[C] =
+    unfold((this, s2)) {
+      case (Cons(h1, t1), Cons(h2, t2)) => Some((f(h1(), h2()), (t1(), t2())))
+      case _ => None
+    }
+
   def zipAll[B](s2: Stream[B]): Stream[(Option[A], Option[B])] = ???
+
+
 
 
   def startsWith[A](s: Stream[A]): Boolean = ???
 
 
+
+
+  def tails: Stream[Stream[A]] = ???
+
+
+
+  def hasSubsequence[A](s: Stream[A]): Boolean =
+    tails exists (_ startsWith s)
+
+
+
+  def scanRight[B](z: B)(f: (A, => B) => B): Stream[B] = ???
+
+
+
+
+
+  
 }
 
 case object Empty extends Stream[Nothing]
@@ -142,15 +187,11 @@ object Stream {
     case None => empty
   }
 
-  def unfoldByFold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] = ???
+  def unfoldByFold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] =
+    f(z).fold(empty: Stream[A])((p: (A, S)) => cons(p._1, unfoldByFold(p._2)(f)))
 
-
-
-
-  def unfoldByMap[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] = ???
-
-
-
+  def unfoldByMap[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] =
+    f(z).map((p: (A, S)) => cons(p._1, unfoldByMap(p._2)(f))).getOrElse(empty)
 
   def fibsByUnfold(): Stream[Int] =
     unfold((0, 1)) {
@@ -167,9 +208,5 @@ object Stream {
     unfold(1)(_ => Some((1, 1)))
 
 //  def onesByUnfold(): Stream[Int] = constantByUnfold(1)
-
-
-
-
 
 }
