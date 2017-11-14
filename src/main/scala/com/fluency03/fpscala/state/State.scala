@@ -64,6 +64,7 @@ object RNG {
     }
 
   def ints2(count: Int)(rng: RNG): (List[Int], RNG) = {
+    @annotation.tailrec
     def loop(count: Int, r: RNG, xs: List[Int]): (List[Int], RNG) =
       if (count == 0)
         (xs, r)
@@ -81,7 +82,7 @@ object RNG {
   def unit[A](a: A): Rand[A] =
     rng => (a, rng)
 
-  def map[A,B](s: Rand[A])(f: A => B): Rand[B] =
+  def map[A, B](s: Rand[A])(f: A => B): Rand[B] =
     rng => {
       val (a, rng2) = s(rng)
       (f(a), rng2)
@@ -93,10 +94,68 @@ object RNG {
   def doubleByMap(rng: RNG): Rand[Double] =
     map(nonNegativeInt)(_ / (Int.MaxValue.toDouble + 1))
 
+  def map2[A, B, C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] =
+    rng => {
+      val (aa, rng2a) = ra(rng)
+      val (ab, rng2b) = rb(rng2a)
+      (f(aa, ab), rng2b)
+    }
+
+  def both[A, B](ra: Rand[A], rb: Rand[B]): Rand[(A, B)] =
+    map2(ra, rb)((_, _))
+
+  val randIntDouble: Rand[(Int, Double)] = both(int, double)
+  val randDoubleInt: Rand[(Double, Int)] = both(double, int)
+
+  def sequence[A](fs: List[Rand[A]]): Rand[List[A]] =
+    fs match {
+      case Nil => rng => (Nil, rng)
+      case x :: xs => rng => (x(rng)._1 :: sequence(xs)(rng)._1, rng)
+    }
+
+  def sequence2[A](fs: List[Rand[A]]): Rand[List[A]] =
+    fs.foldRight(unit(List[A]()))((f, acc) => map2(f, acc)(_ :: _))
+
+  def intsBySequence(count: Int): Rand[List[Int]] =
+    sequence(List.fill(count)(int))
+
+  def flatMap[A, B](f: Rand[A])(g: A => Rand[B]): Rand[B] =
+    rng => {
+      val (a, r) = f(rng)
+      g(a)(r)
+    }
+
+  def nonNegativeLessThan(n: Int): Rand[Int] =
+    flatMap(nonNegativeInt) { i =>
+      val mod = i % n
+      // Retry recursively if the Int we got is higher than the largest multiple of n that fits in a 32-bit Int.
+      if (i + (n-1) - mod >= 0) unit(mod) else nonNegativeLessThan(n)
+    }
+
+  def mapByFlatMap[A, B](s: Rand[A])(f: A => B): Rand[B] =
+    flatMap(s)(a => unit(f(a)))
+
+  def map2ByFlatMap[A, B, C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] =
+    flatMap(ra)(a => map(rb)(b => f(a, b)))
 
 
 
-  
+}
+
+
+case class State[S, +A](run: S => (A, S)) {
+  def map[B](f: A => B): State[S, B] = ???
+
+
+
+  def map2[B,C](sb: State[S, B])(f: (A, B) => C): State[S, C] = ???
+
+
+
+  def flatMap[B](f: A => State[S, B]): State[S, B] = ???
+
+
+
 
 
 }
@@ -104,12 +163,26 @@ object RNG {
 
 object State {
 
+  type Rand[A] = State[RNG, A]
 
 
-
-
+  def unit[S, A](a: A): State[S, A] = ???
 
 
 
 
 }
+
+sealed trait Input
+case object Coin extends Input
+case object Turn extends Input
+
+
+case class Machine(locked: Boolean, candies: Int, coins: Int)
+
+
+
+
+
+
+
