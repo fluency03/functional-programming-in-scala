@@ -7,6 +7,7 @@ Remarks and Code for the Book Functional Programming in Scala.
 - [CHAPTER 3: Functional data structures](./src/main/scala/com/fluency03/fpscala/datastructures)
 - [CHAPTER 4: Handling errors without exceptions](./src/main/scala/com/fluency03/fpscala/handlingerrors)
 - [CHAPTER 5: Strictness and laziness](./src/main/scala/com/fluency03/fpscala/laziness)
+- [CHAPTER 6: Purely functional state](./src/main/scala/com/fluency03/fpscala/state)
 
 
 
