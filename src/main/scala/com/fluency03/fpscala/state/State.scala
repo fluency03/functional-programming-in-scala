@@ -138,38 +138,79 @@ object RNG {
   def map2ByFlatMap[A, B, C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] =
     flatMap(ra)(a => map(rb)(b => f(a, b)))
 
-
-
 }
 
+import State._
 
 case class State[S, +A](run: S => (A, S)) {
-  def map[B](f: A => B): State[S, B] = ???
+//  def map[B](f: A => B): State[S, B] = State(s => {
+//    val (a, s1) = run(s)
+//    (f(a), s1)
+//  })
 
+  def map[B](f: A => B): State[S, B] =
+    flatMap(a => unit(f(a)))
 
+//  def map2[B, C](sb: State[S, B])(f: (A, B) => C): State[S, C] = State(s => {
+//    val (a, s1) = run(s)
+//    val (b, s2) = sb.run(s1)
+//    (f(a, b), s2)
+//  })
 
-  def map2[B,C](sb: State[S, B])(f: (A, B) => C): State[S, C] = ???
+  def map2[B, C](sb: State[S, B])(f: (A, B) => C): State[S, C] =
+    flatMap(a => sb.map(b => f(a, b)))
 
+  def flatMap[B](f: A => State[S, B]): State[S, B] = State(s => {
+    val (a, s1) = run(s)
+    f(a).run(s1)
+  })
 
-
-  def flatMap[B](f: A => State[S, B]): State[S, B] = ???
-
-
-
-
-
+  // TODO(fluency03): why not like this?
+//  def flatMap[B](f: A => State[S, B]): State[S, B] = f(run(_)._1)
 }
 
 
 object State {
-
   type Rand[A] = State[RNG, A]
 
+  def unit[S, A](a: A): State[S, A] =
+    State(s => (a, s))
 
-  def unit[S, A](a: A): State[S, A] = ???
+//  def sequence[S, A](sas: List[State[S, A]]): State[S, List[A]] =
+//    sas match {
+//      case Nil => unit(Nil)
+//      case x :: xs => State(s => {
+//        val (a, s1) = x.run(s)
+//        val (ax, s2) = sequence(xs).run(s1)
+//        (a :: ax, s2)
+//      })
+//    }
 
+  def sequence[S, A](sas: List[State[S, A]]): State[S, List[A]] = {
+    @annotation.tailrec
+    def go(s: S, actions: List[State[S,A]], acc: List[A]): (List[A],S) =
+      actions match {
+        case Nil => (acc.reverse, s)
+        case h :: t => h.run(s) match { case (a, s2) => go(s2, t, a :: acc) }
+      }
+    State((s: S) => go(s, sas, List()))
+  }
 
+  def sequenceByFoldLeft[S, A](sas: List[State[S, A]]): State[S, List[A]] =
+    sas.reverse.foldLeft(unit[S, List[A]](Nil))((acc, one) => one.map2(acc)(_ :: _))
 
+  def sequenceByFoldLRight[S, A](sas: List[State[S, A]]): State[S, List[A]] =
+    sas.foldRight(unit[S, List[A]](Nil))((one, acc) => one.map2(acc)(_ :: _))
+
+  def get[S]: State[S, S] = State(s => (s, s))
+
+  def set[S](s: S): State[S, Unit] = State(_ => ((), s))
+
+  def modify[S](f: S => S): State[S, Unit] =
+    for {
+      s <- get
+      _ <- set(f(s))
+    } yield ()
 
 }
 
@@ -177,10 +218,22 @@ sealed trait Input
 case object Coin extends Input
 case object Turn extends Input
 
-
 case class Machine(locked: Boolean, candies: Int, coins: Int)
 
+object Candy {
 
+  def move(input: Input)(prev: Machine): Machine = ???
+
+
+
+
+
+  def simulateMachine(inputs: List[Input]): State[Machine, (Int, Int)] = ???
+
+
+
+
+}
 
 
 
