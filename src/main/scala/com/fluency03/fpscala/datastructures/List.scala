@@ -54,8 +54,8 @@ object List {
   }
 
   @annotation.tailrec
-  def dropWhile[A](as: List[A])(f: A => Boolean): List[A] = as match {
-    case Cons(h, t) if f(h) => dropWhile(t)(f)
+  def dropWhile2[A](as: List[A])(f: A => Boolean): List[A] = as match {
+    case Cons(h, t) if f(h) => dropWhile2(t)(f)
     case _ => as
   }
 

@@ -14,4 +14,4 @@ case class Charge (cc: CreditCard, amount: Double) {
     }
 }
 
-case class CreditCard()
+case class CreditCard(name: String)

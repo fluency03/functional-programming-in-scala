@@ -28,7 +28,7 @@ object Tree {
 
   def maximum[A](t: Tree[A])(f: (A, A) => A): A = t match {
     case Leaf(v) => v
-    case Branch(l, r) => f(maximum(l), maximum(r))
+    case Branch(l, r) => f(maximum(l)(f), maximum(r)(f))
   }
 
   def fold[IN, ACC](t: Tree[IN])(f: IN => ACC)(g: (ACC, ACC) => ACC): ACC = t match {

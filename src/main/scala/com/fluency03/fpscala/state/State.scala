@@ -1,6 +1,5 @@
 package com.fluency03.fpscala.state
 
-
 trait RNG {
   def nextInt: (Int, RNG)
 }

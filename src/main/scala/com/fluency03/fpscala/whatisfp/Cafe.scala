@@ -11,7 +11,6 @@ class Cafe {
     val (coffees, charges) = purchases.unzip
     (coffees, charges.reduce((c1, c2) => c1.combine(c2)))
   }
-
 }
 
 case class Coffee(price: Double = 3.0)

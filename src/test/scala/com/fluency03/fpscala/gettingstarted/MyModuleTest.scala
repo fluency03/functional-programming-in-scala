@@ -1,42 +1,47 @@
 package com.fluency03.fpscala.gettingstarted
 
-import org.scalatest.FlatSpec
+import org.scalatest._
 
-class MyModuleTest extends FlatSpec {
+class MyModuleTest extends FlatSpec with Matchers {
 
   "MyModule.abs" should "return the absolute value of given integer." in {
-    assert(MyModule.abs(1) == 1)
-    assert(MyModule.abs(-1) == 1)
-    assert(MyModule.abs(0) == 0)
+    MyModule.abs(1) should equal(1)
+    MyModule.abs(-1) should equal(1)
+    MyModule.abs(0) should equal(0)
   }
 
 
   "MyModule.factorial" should "return the factorial result of given integer." in {
-    assert(MyModule.factorial(7) == 5040)
-    assert(MyModule.factorial(1) == 1)
-    assert(MyModule.factorial(0) == 1)
-    assert(MyModule.factorial(-1) == 1)
-    assert(MyModule.factorial(-7) == 1)
-    assert(MyModule.factorial(-10) == 1)
+    MyModule.factorial(7) should equal(5040)
+    MyModule.factorial(1) should equal(1)
+    MyModule.factorial(0) should equal(1)
+    MyModule.factorial(-1) should equal(1)
+    MyModule.factorial(-7) should equal(1)
+    MyModule.factorial(-10) should equal(1)
   }
 
   "MyModule.fib" should "return the nth Fibonacci number of given integer n." in {
-    assert(MyModule.fib(7) == 13)
-    assert(MyModule.fib(10) == 55)
-    assert(MyModule.fib(1) == 1)
-    assert(MyModule.fib(2) == 1)
-    assertThrows[IllegalArgumentException] {
-      MyModule.fib(0)
-    }
-    assertThrows[IllegalArgumentException] {
-      MyModule.fib(-1)
-    }
+    MyModule.fib(7) should equal(13)
+    MyModule.fib(10) should equal(55)
+    MyModule.fib(1) should equal(1)
+    MyModule.fib(2) should equal(1)
+
+    an [IllegalArgumentException] should be thrownBy MyModule.fib(0)
+    an [IllegalArgumentException] should be thrownBy MyModule.fib(-1)
+
+//    an [IllegalArgumentException] should be thrownBy {
+//      MyModule.fib(0)
+//    } should have message "Input number should be larger than zero."
+//
+//    an [IllegalArgumentException] should be thrownBy {
+//      MyModule.fib(-1)
+//    } should have message "Input number should be larger than zero."
   }
 
   "MyModule.formatResult" should "return the result based on given function." in {
-    assert(MyModule.formatResult("absolute value", -42, MyModule.abs) == "The absolute value of -42 is 42.")
-    assert(MyModule.formatResult("factorial", 7, MyModule.factorial) == "The factorial of 7 is 5040.")
-    assert(MyModule.formatResult("Fibonacci number", 10, MyModule.fib) == "The Fibonacci number of 10 is 55.")
+    MyModule.formatResult("absolute value", -42, MyModule.abs) should equal("The absolute value of -42 is 42.")
+    MyModule.formatResult("factorial", 7, MyModule.factorial) should equal("The factorial of 7 is 5040.")
+    MyModule.formatResult("Fibonacci number", 10, MyModule.fib) should equal("The Fibonacci number of 10 is 55.")
   }
 
 }
