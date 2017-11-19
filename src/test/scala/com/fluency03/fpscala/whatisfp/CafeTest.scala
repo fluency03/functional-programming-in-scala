@@ -4,7 +4,11 @@ import org.scalatest._
 
 class CafeTest extends FlatSpec with Matchers {
 
-  it should " be able to buy a Coffee with a Credit Card from a Cafe." in {
+  "A Coffee" should "have a default price 3.0." in {
+    Coffee().price should equal (3.0)
+  }
+
+  it should "be able to buy a Coffee with a Credit Card." in {
     val cc = CreditCard("cc")
 
     val cafe = new Cafe
@@ -15,7 +19,7 @@ class CafeTest extends FlatSpec with Matchers {
 
   }
 
-  it should " be able to buy 5 Coffees with a Credit Card from a Cafe." in {
+  it should "be able to buy multiple Coffees with a Credit Card." in {
     val cc = CreditCard("cc")
 
     val cafe = new Cafe
@@ -26,10 +30,7 @@ class CafeTest extends FlatSpec with Matchers {
       c => c should equal(Coffee())
     }
 
-    charge should equal(Charge(cc, Coffee().price * 5))
-
+    charge should equal(Charge(CreditCard("cc"), Coffee().price * 5))
   }
-
-
 
 }
