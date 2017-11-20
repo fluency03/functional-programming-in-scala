@@ -44,16 +44,25 @@ object MyModule {
     val msg = "The %s of %d is %d."
     msg.format(name, n, f(n))
   }
-
-//  def main(args: Array[String]): Unit =
-//    println(formatAbs(-42))
-//    println(formatFactorial(7))
-//    println(formatResult("absolute value", -42, abs))
-//    println(formatResult("factorial", 7, factorial))
-
 }
 
 object MonomorphicBinarySearch {
+  def binarySearch(ds: Array[Double], key: Double): Int = {
+    @annotation.tailrec
+    def go(low: Int, mid: Int, high: Int): Int = {
+      if (low > high) -mid - 1
+      else {
+        val mid2 = (low + high) / 2
+        val d = ds(mid2) // We index into an array using the same
+                         // syntax as function application
+        if (d == key) mid2
+        else if (d > key) go(low, mid2, mid2-1)
+        else go(mid2 + 1, mid2, high)
+      }
+    }
+    go(0, 0, ds.length - 1)
+  }
+
   def findFirst(ss: Array[String], key: String): Int = {
     @annotation.tailrec
     def loop(n: Int): Int =
@@ -66,6 +75,22 @@ object MonomorphicBinarySearch {
 }
 
 object PolymorphicFunctions {
+  def binarySearch[A](as: Array[A], key: A, gt: (A,A) => Boolean): Int = {
+    @annotation.tailrec
+    def go(low: Int, mid: Int, high: Int): Int = {
+      if (low > high) -mid - 1
+      else {
+        val mid2 = (low + high) / 2
+        val a = as(mid2)
+        val greater = gt(a, key)
+        if (!greater && !gt(key,a)) mid2
+        else if (greater) go(low, mid2, mid2-1)
+        else go(mid2 + 1, mid2, high)
+      }
+    }
+    go(0, 0, as.length - 1)
+  }
+
   def findFirst[A](as: Array[A], p: A => Boolean): Int = {
     @annotation.tailrec
     def loop(n: Int): Int =
@@ -80,8 +105,8 @@ object PolymorphicFunctions {
     @annotation.tailrec
     def loop(n: Int): Boolean =
       if (n >= as.length-1) true
-      else if (ordered(as(n), as(n+1))) false
-      else loop(n + 1)
+      else if (ordered(as(n), as(n+1))) loop(n + 1)
+      else false
 
     loop(0)
   }

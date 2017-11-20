@@ -10,7 +10,6 @@ class MyModuleTest extends FlatSpec with Matchers {
     MyModule.abs(0) should equal(0)
   }
 
-
   "MyModule.factorial" should "return the factorial result of given integer." in {
     MyModule.factorial(7) should equal(5040)
     MyModule.factorial(1) should equal(1)
