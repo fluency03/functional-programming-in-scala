@@ -4,6 +4,10 @@ import org.scalatest._
 
 class PolymorphicFunctionsTest extends FlatSpec with Matchers {
 
+  it should "find the first matching element in the Array using Binary Search." in {
+    pending
+  }
+
   it should "find the first matching element in the Array." in {
     val array = Array("a", "b", "c", "c")
     PolymorphicFunctions.findFirst(array, (e: String) => e == "b") should equal(1)
@@ -21,13 +25,19 @@ class PolymorphicFunctionsTest extends FlatSpec with Matchers {
     PolymorphicFunctions.isSorted(array2, largerOrEqualThan) should equal(false)
   }
 
+  it should "return a partial function." in {
+    pending
+  }
 
+  it should "return a currying function." in {
+    pending
+  }
 
+  it should "return an uncurried function." in {
+    pending
+  }
 
-
-
-
-
-
-
+  it should "return a composed function." in {
+    pending
+  }
 }
