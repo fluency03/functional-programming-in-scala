@@ -25,16 +25,13 @@ class MyModuleTest extends FlatSpec with Matchers {
     MyModule.fib(1) should equal(1)
     MyModule.fib(2) should equal(1)
 
-    an [IllegalArgumentException] should be thrownBy MyModule.fib(0)
-    an [IllegalArgumentException] should be thrownBy MyModule.fib(-1)
+    the [IllegalArgumentException] thrownBy {
+      MyModule.fib(0)
+    } should have message "Input number should be larger than zero."
 
-//    an [IllegalArgumentException] should be thrownBy {
-//      MyModule.fib(0)
-//    } should have message "Input number should be larger than zero."
-//
-//    an [IllegalArgumentException] should be thrownBy {
-//      MyModule.fib(-1)
-//    } should have message "Input number should be larger than zero."
+    the [IllegalArgumentException] thrownBy {
+      MyModule.fib(-1)
+    } should have message "Input number should be larger than zero."
   }
 
   "MyModule.formatResult" should "return the result based on given function." in {

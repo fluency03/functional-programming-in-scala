@@ -27,7 +27,9 @@ class ChargeTest extends FlatSpec with Matchers  {
     val charge5 = Charge(cc, 5)
     val charge10 = Charge(cc2, 10)
 
-    an[IllegalArgumentException] should be thrownBy charge5.combine(charge10)
+    the[IllegalArgumentException] thrownBy {
+      charge5.combine(charge10)
+    } should have message "Can't combine charges to different cards."
   }
 
   it should "be able to coalesce a List of Charges with same Credit Card." in {

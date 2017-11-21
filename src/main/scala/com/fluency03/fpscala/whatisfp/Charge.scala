@@ -10,7 +10,7 @@ case class Charge (cc: CreditCard, amount: Double) {
     if (cc == other.cc) {
       Charge(cc, amount + other.amount)
     } else {
-      throw new IllegalArgumentException("Can't combine charges to different cards")
+      throw new IllegalArgumentException("Can't combine charges to different cards.")
     }
 }
 
