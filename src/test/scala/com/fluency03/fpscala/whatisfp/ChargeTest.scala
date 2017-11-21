@@ -32,14 +32,14 @@ class ChargeTest extends FlatSpec with Matchers  {
     } should have message "Can't combine charges to different cards."
   }
 
-  it should "be able to coalesce a List of Charges with same Credit Card." in {
+  "coalesce" should "coalesce a List of Charges with same Credit Card." in {
     val cc = CreditCard("cc")
     val chargeList = List.fill(5)(Charge(cc, 2))
 
     Charge.coalesce(chargeList) should equal(List(Charge(cc, 10)))
   }
 
-  it should "be able to coalesce a List of Charges with different Credit Cards." in {
+  "coalesce" should "coalesce a List of Charges with different Credit Cards." in {
     val cc = CreditCard("cc")
     val cList = List.fill(5)(Charge(cc, 2))
 

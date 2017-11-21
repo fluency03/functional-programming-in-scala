@@ -8,7 +8,7 @@ class CafeTest extends FlatSpec with Matchers {
     Coffee().price should equal (3.0)
   }
 
-  it should "be able to buy a Coffee with a Credit Card." in {
+  it should "buy a Coffee with a Credit Card." in {
     val cc = CreditCard("cc")
 
     val cafe = new Cafe
@@ -19,7 +19,7 @@ class CafeTest extends FlatSpec with Matchers {
 
   }
 
-  it should "be able to buy multiple Coffees with a Credit Card." in {
+  it should "buy multiple Coffees with a Credit Card." in {
     val cc = CreditCard("cc")
 
     val cafe = new Cafe
