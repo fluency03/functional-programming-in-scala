@@ -5,14 +5,20 @@ import org.scalatest._
 class PolymorphicFunctionsTest extends FlatSpec with Matchers {
 
   it should "find the first matching element in the Array using Binary Search." in {
-    pending
+    val array = Array[Double](1.0, 2.0, 3.0, 4.0)
+    val gt = (e: Double, key: Double) => e > key
+    PolymorphicFunctions.binarySearch(array, 2.0, gt) should equal(1)
+    PolymorphicFunctions.binarySearch(array, 3.0, gt) should equal(2)
+    PolymorphicFunctions.binarySearch(array, 0.0, gt) should equal(-1)
+    PolymorphicFunctions.binarySearch(array, 5.0, gt) should equal(-1)
   }
 
   it should "find the first matching element in the Array." in {
-    val array = Array("a", "b", "c", "c")
+    val array = Array[String]("a", "b", "c", "c")
     PolymorphicFunctions.findFirst(array, (e: String) => e == "b") should equal(1)
     PolymorphicFunctions.findFirst(array, (e: String) => e == "c") should equal(2)
     PolymorphicFunctions.findFirst(array, (e: String) => e == "d") should equal(-1)
+    PolymorphicFunctions.findFirst(array, (e: String) => e == "0") should equal(-1)
   }
 
   it should "check whether an Array is sorted based on given function." in {
