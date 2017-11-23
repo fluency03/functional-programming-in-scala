@@ -4,6 +4,17 @@ import org.scalatest._
 
 class TreeTest extends FlatSpec with Matchers {
 
+  "A Leaf" should "be a Tree." in {
+    Leaf(1) shouldBe a [Tree[_]]
+  }
+
+  "A Branch" should "be a Tree." in {
+    val b = Branch(Leaf(1), Leaf(1))
+    b shouldBe a [Tree[_]]
+    b.left shouldBe a [Tree[_]]
+    b.right shouldBe a [Tree[_]]
+  }
+
   "size" should "return a the size of a Tree." in {
     val l1 = Leaf(1)
     Tree.size(l1) should equal (1)

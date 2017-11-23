@@ -4,11 +4,11 @@ import org.scalatest._
 
 class ListTest extends FlatSpec with Matchers {
 
-  "Nil" should "represent an empty List." in {
+  "A Nil" should "represent an empty List." in {
     Nil should equal(List[Nothing]())
   }
 
-  "Cons" should "represent a List with its head and tail." in {
+  "A Cons" should "represent a List with its head and tail." in {
     val c = Cons(1, Nil)
     c shouldBe a [List[_]]
     c should equal(List(1))
