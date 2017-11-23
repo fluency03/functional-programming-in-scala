@@ -67,19 +67,37 @@ class EitherTest extends FlatSpec with Matchers {
     Either.Try(2/0) shouldBe a [Left[_]]
   }
 
-  "sequence" should "" in {
-    pending
+  "sequence" should "convert a List of Eithers to an Either of List." in {
+    Either.sequence(List(Right(1), Right(2), Right(3), Right(4))) should equal(Right(List(1, 2, 3, 4)))
+    Either.sequence(List(Right(1), Left(2), Right(3), Right(4))) should equal(Left(2))
+    Either.sequence(Nil) should equal(Right(Nil))
+    Either.sequence(List(Left(1))) should equal(Left(1))
   }
 
-  "sequence2" should "" in {
-    pending
+  "sequence2" should "convert a List of Eithers to an Either of List." in {
+    Either.sequence2(List(Right(1), Right(2), Right(3), Right(4))) should equal(Right(List(1, 2, 3, 4)))
+    Either.sequence2(List(Right(1), Left(2), Right(3), Right(4))) should equal(Left(2))
+    Either.sequence2(Nil) should equal(Right(Nil))
+    Either.sequence2(List(Left(1))) should equal(Left(1))
   }
 
-  "traverse" should "" in {
-    pending
+  "traverse" should "convert a List to a List an Either of List." in {
+    val f: Int => Either[String, Int] = (i: Int) => i match {
+      case 0 => Left("Zero")
+      case ii => Right(ii)
+    }
+    Either.traverse(Nil)(f) should equal(Right(Nil))
+    Either.traverse(List(1))(f) should equal(Right(List(1)))
+    Either.traverse(List(1, 0))(f) should equal(Left("Zero"))
   }
 
-  "traverse2" should "" in {
-    pending
+  "traverse2" should "convert a List to a List an Either of List." in {
+    val f: Int => Either[String, Int] = (i: Int) => i match {
+      case 0 => Left("Zero")
+      case ii => Right(ii)
+    }
+    Either.traverse2(Nil)(f) should equal(Right(Nil))
+    Either.traverse2(List(1))(f) should equal(Right(List(1)))
+    Either.traverse2(List(1, 0))(f) should equal(Left("Zero"))
   }
 }
