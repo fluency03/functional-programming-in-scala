@@ -2,6 +2,8 @@ package com.fluency03.fpscala.handlingerrors
 
 import org.scalatest._
 
+import scala.util.Try
+
 class OptionTest extends FlatSpec with Matchers {
 
   "A Some" should "be an Option." in {
@@ -79,11 +81,19 @@ class OptionTest extends FlatSpec with Matchers {
   }
 
   "map2" should "apply f if the Option is not None, or None if None." in {
-    pending
+    val f = (a: Int, b: Int) => a + b
+    Option.map2(Some(1), Some(2))(f) should equal(Some(3))
+    Option.map2(None, Some(2))(f) should equal(None)
+    Option.map2(Some(1), None)(f) should equal(None)
+    Option.map2(None, None)(f) should equal(None)
   }
 
   "map22" should "apply f if the Option is not None, or None if None." in {
-    pending
+    val f = (a: Int, b: Int) => a + b
+    Option.map22(Some(1), Some(2))(f) should equal(Some(3))
+    Option.map22(None, Some(2))(f) should equal(None)
+    Option.map22(Some(1), None)(f) should equal(None)
+    Option.map22(None, None)(f) should equal(None)
   }
 
   "insuranceRateQuote" should "" in {
@@ -99,28 +109,42 @@ class OptionTest extends FlatSpec with Matchers {
     pending
   }
 
-  "sequence" should "" in {
-    pending
+  "sequence" should "convert a List of Options to an Option of a List." in {
+    Option.sequence(Nil) should equal(Some(Nil))
+    Option.sequence(List(Some(1))) should equal(Some(List(1)))
+    Option.sequence(List(Some(1), None)) should equal(None)
   }
 
   "sequence2" should "" in {
-    pending
+    Option.sequence2(Nil) should equal(Some(Nil))
+    Option.sequence2(List(Some(1))) should equal(Some(List(1)))
+    Option.sequence2(List(Some(1), None)) should equal(None)
   }
 
-  "parseInts" should "" in {
-    pending
+  "parseInts" should "convert a List of Strings to an Option of a List of Ints." in {
+    Option.parseInts(Nil) should equal(Some(Nil))
+    Option.parseInts(List("1", "2", "3")) should equal(Some(List(1, 2, 3)))
+    Option.parseInts(List("a", "2", "3")) should equal(None)
   }
 
-  "traverse" should "" in {
-    pending
+  "traverse" should "convert a List of A to an Option of List of B." in {
+    val f: String => Option[Int] = (s: String) => Option.Try(s.toInt)
+    Option.traverse(Nil)(f) should equal(Some(Nil))
+    Option.traverse(List("1", "2", "3"))(f) should equal(Some(List(1, 2, 3)))
+    Option.traverse(List("a", "2", "3"))(f) should equal(None)
   }
 
-  "traverse2" should "" in {
-    pending
+  "traverse2" should "convert a List of A to an Option of List of B." in {
+    val f: String => Option[Int] = (s: String) => Option.Try(s.toInt)
+    Option.traverse2(Nil)(f) should equal(Some(Nil))
+    Option.traverse2(List("1", "2", "3"))(f) should equal(Some(List(1, 2, 3)))
+    Option.traverse2(List("a", "2", "3"))(f) should equal(None)
   }
 
-  "sequenceViaTraverse" should "" in {
-    pending
+  "sequenceViaTraverse" should "convert a List of Options to an Option of a List." in {
+    Option.sequenceViaTraverse(Nil) should equal(Some(Nil))
+    Option.sequenceViaTraverse(List(Some(1))) should equal(Some(List(1)))
+    Option.sequenceViaTraverse(List(Some(1), None)) should equal(None)
   }
 
 }
