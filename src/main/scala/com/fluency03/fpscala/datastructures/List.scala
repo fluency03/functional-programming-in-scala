@@ -127,7 +127,7 @@ object List {
   def concat[A](l: List[List[A]]): List[A] =
     foldRight(l, Nil: List[A])(appendByFoldRight)
 
-  def add1(l: List[Int]): List[Int] =
+  def addOne(l: List[Int]): List[Int] =
     foldRight(l, Nil: List[Int])((x, xs) => Cons(x + 1, xs))
 
   def doubleToString(l: List[Double]): List[String] =
@@ -167,7 +167,7 @@ object List {
     List(buf.toList: _*)
   }
 
-  def flatMap[A,B](l: List[A])(f: A => List[B]): List[B] =
+  def flatMap[A, B](l: List[A])(f: A => List[B]): List[B] =
     concat(map(l)(f))
 
   def filterByFlatMap[A](l: List[A])(f: A => Boolean): List[A] =
@@ -179,7 +179,7 @@ object List {
     case (Cons(h1, t1), Cons(h2, t2)) => Cons(h1 + h2, addPairwise(t1, t2))
   }
 
-  def zipWith[A,B,C](a: List[A], b: List[B])(f: (A, B) => C): List[C] = (a, b) match {
+  def zipWith[A, B, C](a: List[A], b: List[B])(f: (A, B) => C): List[C] = (a, b) match {
     case (Nil, _) => Nil
     case (_, Nil) => Nil
     case (Cons(h1, t1), Cons(h2, t2)) => Cons(f(h1, h2), zipWith(t1, t2)(f))

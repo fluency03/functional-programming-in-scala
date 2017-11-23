@@ -216,75 +216,188 @@ class ListTest extends FlatSpec with Matchers {
   }
 
   "foldRightByFoldLeft" should "accumulate the List from Right by applying given function." in {
-    pending
+    val l = List(1, 2, 3, 4, 5)
+    List.foldRightByFoldLeft(l, 1)(_ + _) should equal(16)
+
+    val strs = List("a", "b", "c", "d", "e")
+    List.foldRightByFoldLeft(strs, "0")(_ + "<-" + _) should equal("a<-b<-c<-d<-e<-0")
   }
 
   "foldLeftByFoldRight" should "accumulate the List from Left by applying given function." in {
-    pending
+    val l = List(1, 2, 3, 4, 5)
+    List.foldLeftByFoldRight(l, 1)(_ + _) should equal(16)
+
+    val strs = List("a", "b", "c", "d", "e")
+    List.foldLeftByFoldRight(strs, "0")(_ + "->" + _) should equal("0->a->b->c->d->e")
   }
 
   "appendByFoldRight" should "return a new List one List appended after another." in {
-    pending
+    List.appendByFoldRight(Nil, Nil) should equal(Nil)
+    List.appendByFoldRight(Nil, List(1)) should equal(List(1))
+    List.appendByFoldRight(List(1), Nil) should equal(List(1))
+    List.appendByFoldRight(List(1, 2), List(3, 4)) should equal(List(1, 2, 3, 4))
   }
 
   "concat" should "return a new List with all given Lists concatenated together." in {
-    pending
+    val lOfL = List(
+      List(1, 2, 3), Nil, List(4, 5, 6), List(), List(7, 8)
+    )
+    List.concat(lOfL) should equal(List(1, 2, 3, 4, 5, 6, 7, 8))
   }
 
-  "add1" should "return a new List with all elements added by 1 from given List." in {
-    pending
+  "addOne" should "return a new List with all elements added by 1 from given List." in {
+    List.addOne(List()) should equal(Nil)
+    List.addOne(Nil) should equal(Nil)
+    List.addOne(List(1, 2, 3)) should equal(List(2, 3, 4))
   }
 
   "doubleToString" should "return a new List with all String elements converted from given Double List." in {
-    pending
+    List.doubleToString(List()) should equal(Nil)
+    List.doubleToString(Nil) should equal(Nil)
+    List.doubleToString(List(1.0, 2.0, 3.0)) should equal(List("1.0", "2.0", "3.0"))
   }
 
   "map" should "return a new List by applying given function on each element of input List." in {
-    pending
+    val addOne = (i: Int) => i + 1
+    val doubleToString = (d: Double) => d.toString
+
+    List.map(List())(addOne) should equal(Nil)
+    List.map(Nil)(addOne) should equal(Nil)
+    List.map(List(1, 2, 3))(addOne) should equal(List(2, 3, 4))
+
+    List.map(List())(doubleToString) should equal(Nil)
+    List.map(Nil)(doubleToString) should equal(Nil)
+    List.map(List(1.0, 2.0, 3.0))(doubleToString) should equal(List("1.0", "2.0", "3.0"))
   }
 
   "map2" should "return a new List by applying given function on each element of input List." in {
-    pending
+    val addOne = (i: Int) => i + 1
+    val doubleToString = (d: Double) => d.toString
+
+    List.map2(List())(addOne) should equal(Nil)
+    List.map2(Nil)(addOne) should equal(Nil)
+    List.map2(List(1, 2, 3))(addOne) should equal(List(2, 3, 4))
+
+    List.map2(List())(doubleToString) should equal(Nil)
+    List.map2(Nil)(doubleToString) should equal(Nil)
+    List.map2(List(1.0, 2.0, 3.0))(doubleToString) should equal(List("1.0", "2.0", "3.0"))
   }
 
   "map3" should "return a new List by applying given function on each element of input List." in {
-    pending
+    val addOne = (i: Int) => i + 1
+    val doubleToString = (d: Double) => d.toString
+
+    List.map2(List())(addOne) should equal(Nil)
+    List.map2(Nil)(addOne) should equal(Nil)
+    List.map2(List(1, 2, 3))(addOne) should equal(List(2, 3, 4))
+
+    List.map2(List())(doubleToString) should equal(Nil)
+    List.map2(Nil)(doubleToString) should equal(Nil)
+    List.map2(List(1.0, 2.0, 3.0))(doubleToString) should equal(List("1.0", "2.0", "3.0"))
   }
 
   "filter" should "return a new List with elements from given List meeting given condition. " in {
-    pending
+    val isEven = (i: Int) => i%2 == 0
+    val isLargerThanFive = (d: Double) => d > 5.0
+
+    List.filter(List())(isEven) should equal(Nil)
+    List.filter(Nil)(isEven) should equal(Nil)
+    List.filter(List(1, 2, 3, 4, 5))(isEven) should equal(List(2, 4))
+
+    List.filter(List())(isLargerThanFive) should equal(Nil)
+    List.filter(Nil)(isLargerThanFive) should equal(Nil)
+    List.filter(List(2.0, 3.0, 6.0 , 5.0))(isLargerThanFive) should equal(List(6.0))
   }
 
   "filter2" should "return a new List with elements from given List meeting given condition. " in {
-    pending
+    val isEven = (i: Int) => i%2 == 0
+    val isLargerThanFive = (d: Double) => d > 5.0
+
+    List.filter2(List())(isEven) should equal(Nil)
+    List.filter2(Nil)(isEven) should equal(Nil)
+    List.filter2(List(1, 2, 3, 4, 5))(isEven) should equal(List(2, 4))
+
+    List.filter2(List())(isLargerThanFive) should equal(Nil)
+    List.filter2(Nil)(isLargerThanFive) should equal(Nil)
+    List.filter2(List(2.0, 3.0, 6.0 , 5.0))(isLargerThanFive) should equal(List(6.0))
   }
 
   "filter3" should "return a new List with elements from given List meeting given condition. " in {
-    pending
+    val isEven = (i: Int) => i%2 == 0
+    val isLargerThanFive = (d: Double) => d > 5.0
+
+    List.filter3(List())(isEven) should equal(Nil)
+    List.filter3(Nil)(isEven) should equal(Nil)
+    List.filter3(List(1, 2, 3, 4, 5))(isEven) should equal(List(2, 4))
+
+    List.filter3(List())(isLargerThanFive) should equal(Nil)
+    List.filter3(Nil)(isLargerThanFive) should equal(Nil)
+    List.filter3(List(2.0, 3.0, 6.0 , 5.0))(isLargerThanFive) should equal(List(6.0))
   }
 
   "flatMap" should "return a new List by concatenating all Lists generated by splitting each element of input List." in {
-    pending
+    val splitBySpace = (s: String) => List(s.split(" "):_*)
+
+    List.flatMap(List())(splitBySpace) should equal(Nil)
+    List.flatMap(Nil)(splitBySpace) should equal(Nil)
+    List.flatMap(List("this is a message", ": hello world!"))(splitBySpace) should equal(
+      List("this", "is", "a", "message", ":", "hello", "world!")
+    )
   }
 
   "filterByFlatMap" should "return a new List with elements from given List meeting given condition. " in {
-    pending
+    val isEven = (i: Int) => i%2 == 0
+    val isLargerThanFive = (d: Double) => d > 5.0
+
+    List.filterByFlatMap(List())(isEven) should equal(Nil)
+    List.filterByFlatMap(Nil)(isEven) should equal(Nil)
+    List.filterByFlatMap(List(1, 2, 3, 4, 5))(isEven) should equal(List(2, 4))
+
+    List.filterByFlatMap(List())(isLargerThanFive) should equal(Nil)
+    List.filterByFlatMap(Nil)(isLargerThanFive) should equal(Nil)
+    List.filterByFlatMap(List(2.0, 3.0, 6.0 , 5.0))(isLargerThanFive) should equal(List(6.0))
   }
 
-  "addPairwise" should "" in {
-    pending
+  "addPairwise" should "add the elements from two Lists pairwise." in {
+    List.addPairwise(List(), Nil) should equal(Nil)
+    List.addPairwise(List(1), Nil) should equal(Nil)
+    List.addPairwise(Nil, List(1)) should equal(Nil)
+    List.addPairwise(List(1, 2), List(3, 4)) should equal(List(4, 6))
   }
 
-  "zipWith" should "" in {
-    pending
+  "zipWith" should "apply the given function by taking the elements from two Lists pairwise." in {
+    val addInt = (a: Int, b: Int) => a + b
+    val addStr = (a: String, b: String) => a + b
+
+    List.zipWith(List(), Nil)(addInt) should equal(Nil)
+    List.zipWith(List(1), Nil)(addInt) should equal(Nil)
+    List.zipWith(Nil, List(1))(addInt) should equal(Nil)
+    List.zipWith(List(1, 2), List(3, 4))(addInt) should equal(List(4, 6))
+
+    List.zipWith(List(), Nil)(addStr) should equal(Nil)
+    List.zipWith(List("1"), Nil)(addStr) should equal(Nil)
+    List.zipWith(Nil, List("1"))(addStr) should equal(Nil)
+    List.zipWith(List("a", "b"), List("1", "2"))(addStr) should equal(List("a1", "b2"))
   }
 
-  "startsWith" should "" in {
-    pending
+  "startsWith" should "check whether one List is the first part of another." in {
+    List.startsWith(List(), Nil) should equal(true)
+    List.startsWith(List(1), Nil) should equal(true)
+    List.startsWith(Nil, List(1)) should equal(false)
+    List.startsWith(List(1, 2), List(3, 4)) should equal(false)
+    List.startsWith(List(1, 2), List(1, 2)) should equal(true)
+    List.startsWith(List(1, 2), List(1)) should equal(true)
+    List.startsWith(List(1, 2), List(2)) should equal(false)
   }
 
-  "hasSubsequence" should "" in {
-    pending
+  "hasSubsequence" should "check whether one List is a sub-sequence of another." in {
+    List.hasSubsequence(List(), Nil) should equal(true)
+    List.hasSubsequence(List(1), Nil) should equal(true)
+    List.hasSubsequence(Nil, List(1)) should equal(false)
+    List.hasSubsequence(List(1, 2), List(3, 4)) should equal(false)
+    List.hasSubsequence(List(1, 2), List(1, 2)) should equal(true)
+    List.hasSubsequence(List(1, 2), List(1)) should equal(true)
+    List.hasSubsequence(List(1, 2), List(2)) should equal(true)
   }
-  
+
 }
