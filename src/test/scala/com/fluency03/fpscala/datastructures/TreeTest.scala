@@ -79,27 +79,82 @@ class TreeTest extends FlatSpec with Matchers {
   }
 
   "fold" should "accumulate a Tree to a value." in {
-    pending
+    val t = Branch(Branch(Leaf(1), Leaf(2)), Leaf(2))
+    Tree.fold(t)(_ + 0)(_ + _) should equal(5)
+    Tree.fold(t)(_ + 1)(_ + _) should equal(8)
+
+    val t2 = Branch(Branch(Leaf("1"), Leaf("2")), Leaf("3"))
+    Tree.fold(t2)(_ + "")(_ + _) should equal("123")
+    Tree.fold(t2)(_ + "->")(_ + _) should equal("1->2->3->")
   }
 
   "foldWithInit" should "accumulate a Tree to a value from a initial value." in {
-    pending
+    val t = Branch(Branch(Leaf(1), Leaf(2)), Leaf(2))
+    Tree.foldWithInit(t, 0)(_ + _)(_ + _) should equal(5)
+    Tree.foldWithInit(t, 1)(_ + _)(_ + _) should equal(8)
+
+    val t2 = Branch(Branch(Leaf("1"), Leaf("2")), Leaf("3"))
+    Tree.foldWithInit(t2, "")(_ + _)(_ + _) should equal("123")
+    Tree.foldWithInit(t2, "->")(_ + _)(_ + _) should equal("1->2->3->")
   }
 
   "sizeByFold" should "return a the size of a Tree." in {
-    pending
+    val l1 = Leaf(1)
+    Tree.sizeByFold(l1) should equal (1)
+
+    val l2 = Leaf(2)
+    val b1 = Branch(l1, l2)
+    Tree.sizeByFold(b1) should equal (3)
+
+    val l3 = Leaf(3)
+    val b2 = Branch(b1, l3)
+    Tree.sizeByFold(b2) should equal (5)
   }
 
   "maximumByFold" should "return the maximum element of a Tree." in {
-    pending
+    val l1 = Leaf(1)
+    Tree.maximumByFold(l1) should equal (1)
+
+    val l2 = Leaf(2)
+    val b1 = Branch(l1, l2)
+    Tree.maximumByFold(b1) should equal (2)
+
+    val l3 = Leaf(3)
+    val b2 = Branch(b1, l3)
+    Tree.maximumByFold(b2) should equal (3)
   }
 
   "depthByFold" should "return the depth of a Tree." in {
-    pending
+    val l1 = Leaf(1)
+    Tree.depthByFold(l1) should equal (0)
+
+    val l2 = Leaf(2)
+    val b1 = Branch(l1, l2)
+    Tree.depthByFold(b1) should equal (1)
+
+    val l3 = Leaf(3)
+    val b2 = Branch(b1, l3)
+    Tree.depthByFold(b2) should equal (2)
+
+    val l4 = Leaf(4)
+    val b3 = Branch(b2, l4)
+    Tree.depthByFold(b3) should equal (3)
   }
 
   "mapByFold" should "return a new Tree by applying the given function on a Tree." in {
-    pending
+    val intToString = (i: Int) => i.toString
+
+    Tree.mapByFold(Leaf(1))(intToString) should equal (Leaf("1"))
+    Tree.mapByFold(
+      Branch(Leaf(1), Leaf(2))
+    )(intToString) should equal (
+      Branch(Leaf("1"), Leaf("2"))
+    )
+    Tree.mapByFold(
+      Branch(Branch(Leaf(1), Leaf(2)), Leaf(2))
+    )(intToString) should equal (
+      Branch(Branch(Leaf("1"), Leaf("2")), Leaf("2"))
+    )
   }
 
 }
