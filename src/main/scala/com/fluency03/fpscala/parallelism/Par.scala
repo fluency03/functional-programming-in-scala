@@ -76,6 +76,13 @@ object Par {
    */
   def run[A](es: ExecutorService)(a: Par[A]): Future[A] = a(es)
 
+
+  def map2WithTimeout[A, B, C](a: Par[A], b: Par[B])(f: (A, B) => C): Par[C] =
+    es => {
+      val (af, bf) = (a(es), b(es))
+      Map2Future(af, bf, f)
+    }
+
   def asyncF[A, B](f: A => B): A => Par[B] =
     a => lazyUnit(f(a))
 
@@ -123,7 +130,18 @@ object Par {
     sequence(fbs)
   }
 
-  def parFilter[A](as: List[A])(f: A => Boolean): Par[List[A]] = ???
+  // TODO (fluency03): whether this is ok?
+  def parFilterByLazyUnit[A](as: List[A])(f: A => Boolean): Par[List[A]] =
+    lazyUnit(as.filter(f))
+
+  def parFilter[A](l: List[A])(f: A => Boolean): Par[List[A]] = {
+    val pars: List[Par[List[A]]] =
+      l map asyncF((a: A) => if (f(a)) List(a) else List())
+    map(sequence(pars))(_.flatten) // convenience method on `List` for concatenating a list of lists
+  }
+
+  def equal[A](e: ExecutorService)(p: Par[A], p2: Par[A]): Boolean =
+    p(e).get == p2(e).get
 
 
 
@@ -132,8 +150,32 @@ object Par {
 
 
 
+}
 
+/**
+ * Note: this implementation will not prevent repeated evaluation if multiple threads call `get` in parallel.
+ * We could prevent this using synchronization, but it isn't needed for our purposes here
+ * (also, repeated evaluation of pure values won't affect results).
+ */
+case class Map2Future[A, B, C](a: Future[A], b: Future[B], f: (A,B) => C) extends Future[C] {
+  @volatile var cache: Option[C] = None
+  def isDone: Boolean = cache.isDefined
+  def isCancelled: Boolean = a.isCancelled || b.isCancelled
+  def cancel(evenIfRunning: Boolean): Boolean =
+    a.cancel(evenIfRunning) || b.cancel(evenIfRunning)
+  def get: C = compute(Long.MaxValue)
+  def get(timeout: Long, units: TimeUnit): C =
+    compute(TimeUnit.NANOSECONDS.convert(timeout, units))
 
-
-
+  private def compute(timeoutInNanos: Long): C = cache match {
+    case Some(c) => c
+    case None =>
+      val start = System.nanoTime
+      val ar = a.get(timeoutInNanos, TimeUnit.NANOSECONDS)
+      val stop = System.nanoTime;val aTime = stop-start
+      val br = b.get(timeoutInNanos - aTime, TimeUnit.NANOSECONDS)
+      val ret = f(ar, br)
+      cache = Some(ret)
+      ret
+  }
 }
