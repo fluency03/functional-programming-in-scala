@@ -22,8 +22,6 @@ object Par {
     def cancel(evenIfRunning: Boolean): Boolean = false
   }
 
-  def get[A](a: Par[A]): A = ???
-
   def sum(ints: IndexedSeq[Int]): Par[Int] =
     if (ints.length <= 1)
       Par.unit(ints.headOption getOrElse 0)
@@ -56,7 +54,7 @@ object Par {
    * fork marks a computation for concurrent evaluation. The evaluation won’t actually occur until forced by run.
    */
   def fork[A](a: => Par[A]): Par[A] =
-    es => es.submit(new Callable[A] {
+    (es: ExecutorService) => es.submit(new Callable[A] {
       def call: A = a(es).get
     })
 
@@ -76,13 +74,62 @@ object Par {
    * since Par is represented by a function that needs an ExecutorService,
    * the creation of the Future doesn’t actually happen until this ExectorService is provided.
    */
-  def run[A](s: ExecutorService)(a: Par[A]): Future[A] = a(s)
+  def run[A](es: ExecutorService)(a: Par[A]): Future[A] = a(es)
+
+  def asyncF[A, B](f: A => B): A => Par[B] =
+    a => lazyUnit(f(a))
+
+  def sortPar(parList: Par[List[Int]]): Par[List[Int]] =
+    map(parList)(_.sorted)
+
+  def map[A, B](pa: Par[A])(f: A => B): Par[B] =
+    map2(pa, unit(()))((a,_) => f(a))
+
+  // TODO (fluency03): whether this is ok?
+  def parMapByLazyUnit[A, B](ps: List[A])(f: A => B): Par[List[B]] =
+    lazyUnit(ps.map(f))
+
+  // TODO (fluency03): difference betweeen using foldLeft and foldRight?
+  def sequenceByFoldLeft[A](ps: List[Par[A]]): Par[List[A]] =
+    ps.foldLeft(unit(List[A]()))((acc: Par[List[A]], in: Par[A]) => map2(in, acc)(_ :: _))
+
+  def sequenceByFoldRight[A](ps: List[Par[A]]): Par[List[A]] =
+    ps.foldRight(unit(List[A]()))((in: Par[A], acc: Par[List[A]]) => map2(in, acc)(_ :: _))
+
+  def sequenceRecursive[A](ps: List[Par[A]]): Par[List[A]] =
+    ps match {
+      case Nil => unit(Nil)
+      // TODO (fluency03): why using fork here?
+      case x :: xs => map2(x, fork(sequenceRecursive(xs)))(_ :: _)
+    }
+
+  // TODO (fluency03): difference of using fork outside vs using fork on recursion as above?
+  def sequenceBalanced[A](as: IndexedSeq[Par[A]]): Par[IndexedSeq[A]] = fork {
+    as match {
+      case IndexedSeq() => unit(IndexedSeq())
+      case IndexedSeq(one) => map(one)(IndexedSeq(_))
+      case x +: xs =>
+        val (l,r) = as.splitAt(as.length / 2)
+        map2(sequenceBalanced(l), sequenceBalanced(r))(_ ++ _)
+    }
+  }
+
+  def sequence[A](ps: List[Par[A]]): Par[List[A]] =
+    map(sequenceBalanced(ps.toIndexedSeq))(_.toList)
+
+  // TODO (fluency03): why fork plus asyncF?
+  def parMap[A,B](ps: List[A])(f: A => B): Par[List[B]] = fork {
+    val fbs: List[Par[B]] = ps.map(asyncF(f))
+    sequence(fbs)
+  }
+
+  def parFilter[A](as: List[A])(f: A => Boolean): Par[List[A]] = ???
 
 
 
 
 
-  def asyncF[A,B](f: A => B): A => Par[B] = ???
+
 
 
 
