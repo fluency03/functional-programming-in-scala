@@ -5,6 +5,8 @@ import Stream._
 sealed trait Stream[+A] {
   def headOption: Option[A] = this match {
     case Empty => None
+    // Explicit forcing of the h thunk using h()
+    // Evaluate only the portion actually demanded (we don’t evaluate the tail of the Cons)
     case Cons(h, t) => Some(h())
   }
 
@@ -156,11 +158,25 @@ sealed trait Stream[+A] {
 }
 
 case object Empty extends Stream[Nothing]
+
+/**
+ * A nonempty stream consists of a head and a tail, which are both non-strict.
+ * Due to technical limitations, these are thunks that must be explicitly forced,
+ * rather than by-name parameters.
+ */
 case class Cons[+A](h: () => A, t: () => Stream[A]) extends Stream[A]
 
 
 object Stream {
+  /**
+   * Smart constructor.
+   *
+   * It takes care of memoizing the by-name arguments for the head and
+   * tail of the Cons. This is a common trick, and it ensures that our thunk will only do
+   * its work once, when forced for the first time.
+   */
   def cons[A](hd: => A, tl: => Stream[A]): Stream[A] = {
+    // We cache the head and tail as lazy values to avoid repeated evaluation.
     lazy val head = hd
     lazy val tail = tl
     Cons(() => head, () => tail)

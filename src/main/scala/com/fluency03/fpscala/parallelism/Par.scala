@@ -67,7 +67,8 @@ object Par {
    * that we’re losing out on some potential parallelism. Essentially, we’re using two threads when one
    * should suffice. This is a symptom of a more serious problem with the implementation.
    */
-  def lazyUnit[A](a: => A): Par[A] = fork(unit(a))
+  def lazyUnit[A](a: => A): Par[A] =
+    fork(unit(a))
 
   /**
    * run extracts a value from a Par by actually performing the computation.
@@ -75,7 +76,6 @@ object Par {
    * the creation of the Future doesn’t actually happen until this ExectorService is provided.
    */
   def run[A](es: ExecutorService)(a: Par[A]): Future[A] = a(es)
-
 
   def map2WithTimeout[A, B, C](a: Par[A], b: Par[B])(f: (A, B) => C): Par[C] =
     es => {
@@ -90,7 +90,7 @@ object Par {
     map(parList)(_.sorted)
 
   def map[A, B](pa: Par[A])(f: A => B): Par[B] =
-    map2(pa, unit(()))((a,_) => f(a))
+    map2(pa, unit(()))((a, _) => f(a))
 
   // TODO (fluency03): whether this is ok?
   def parMapByLazyUnit[A, B](ps: List[A])(f: A => B): Par[List[B]] =
@@ -172,7 +172,8 @@ case class Map2Future[A, B, C](a: Future[A], b: Future[B], f: (A,B) => C) extend
     case None =>
       val start = System.nanoTime
       val ar = a.get(timeoutInNanos, TimeUnit.NANOSECONDS)
-      val stop = System.nanoTime;val aTime = stop-start
+      val stop = System.nanoTime
+      val aTime = stop - start
       val br = b.get(timeoutInNanos - aTime, TimeUnit.NANOSECONDS)
       val ret = f(ar, br)
       cache = Some(ret)
