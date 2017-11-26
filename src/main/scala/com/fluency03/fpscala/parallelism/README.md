@@ -53,6 +53,10 @@
 - We could even go so far as to remove run from our API altogether and expose the apply method on `Par` instead so that users can register asynchronous callbacks. 
 
 
+**actor**
+- An Actor is essentially a concurrent process that doesn’t constantly occupy a thread.
+Instead, it only occupies a thread when it receives a message.
+- Importantly, although multiple threads may be concurrently sending messages to an actor, the actor processes only one message at a time, queueing other messages for subsequent processing. 
 
 
 

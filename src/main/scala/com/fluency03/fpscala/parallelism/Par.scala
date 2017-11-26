@@ -13,7 +13,7 @@ object Par {
    * which is a simple implementation of Future that just wraps a constant value.
    * It doesn’t use the ExecutorService at all. It’s always done and can’t be cancelled.
    */
-  def unit[A](a: A): Par[A] = (es: ExecutorService) => UnitFuture(a)
+  def unit[A](a: A): Par[A] = (_: ExecutorService) => UnitFuture(a)
 
   private case class UnitFuture[A](get: A) extends Future[A] {
     def isDone = true
@@ -153,8 +153,8 @@ object Par {
     as match {
       case IndexedSeq() => unit(IndexedSeq())
       case IndexedSeq(one) => map(one)(IndexedSeq(_))
-      case x +: xs =>
-        val (l,r) = as.splitAt(as.length / 2)
+      case _ +: _ =>
+        val (l, r) = as.splitAt(as.length / 2)
         map2(sequenceBalanced(l), sequenceBalanced(r))(_ ++ _)
     }
   }
