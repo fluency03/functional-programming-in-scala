@@ -37,5 +37,25 @@
   - we have the choice of whether a particular task should be performed asynchronously;
 - We know we want fork to signal that its argument gets evaluated in a separate logical thread.
 
+- In functional programming it’s easy, and expected, to factor out common functionality into generic, reusable components that can be composed. Side effects hurt compo- sitionality, but more generally, any hidden or out-of-band assumption or behavior that prevents us from treating our components (be they functions or anything else) as black boxes makes composition difficult or impossible.
+- You can try to fix your implementation such that the law holds, or you can refine your law a bit, to state more explicitly the conditions under which it holds (you could simply stipulate that you require thread pools that can grow unbounded).
+- Even this is a good exercise — it forces you to document invariants or assumptions that were previously implicit.
+- The essential problem with the current representation `Par.scala` is that we can’t get a value out of a `Future` without the current thread blocking on its get method.
+
+**non-blocking Par**
+
+- An `A => Unit`? Such a function can only be useful for executing some side effect using the given `A`, as we certainly aren’t using the returned result. 
+- Are we still doing functional programming in using a type like `Future`? Yes, but we’re making use of a common technique of using side effects as an implementation detail for a purely functional API.
+- Side effects employed can’t be observed by outside code.
+- It should be noted that `run` blocks the calling thread while waiting for the latch. It’s not possible to write an implementation of run that doesn’t block.
+- Since it needs to return a value of type `A`, it has to wait for that value to become available before it can return.
+- We want users of our API to avoid calling run until they definitely want to wait for a result.
+- We could even go so far as to remove run from our API altogether and expose the apply method on `Par` instead so that users can register asynchronous callbacks. 
+
+
+
+
+
+
 
 

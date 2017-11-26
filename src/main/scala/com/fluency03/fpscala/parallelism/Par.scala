@@ -208,6 +208,18 @@ object Par {
   def equal[A](e: ExecutorService)(p: Par[A], p2: Par[A]): Boolean =
     p(e).get == p2(e).get
 
+  def delay[A](fa: => Par[A]): Par[A] =
+    es => fa(es)
+
+
+
+
+
+
+
+
+
+
 
 
 
