@@ -24,10 +24,10 @@ object Par {
 
   def sum(ints: IndexedSeq[Int]): Par[Int] =
     if (ints.length <= 1)
-      Par.unit(ints.headOption getOrElse 0)
+      unit(ints.headOption getOrElse 0)
     else {
       val (l, r) = ints.splitAt(ints.length / 2)
-      Par.map2(Par.fork(sum(l)), Par.fork(sum(r)))(_ + _)
+      map2(fork(sum(l)), fork(sum(r)))(_ + _)
     }
 
   /**
@@ -83,6 +83,35 @@ object Par {
       Map2Future(af, bf, f)
     }
 
+  /**
+   * Note: this implementation will not prevent repeated evaluation if multiple threads call `get` in parallel.
+   * We could prevent this using synchronization, but it isn't needed for our purposes here
+   * (also, repeated evaluation of pure values won't affect results).
+   */
+  private case class Map2Future[A, B, C](a: Future[A], b: Future[B], f: (A,B) => C) extends Future[C] {
+    @volatile var cache: Option[C] = None
+    def isDone: Boolean = cache.isDefined
+    def isCancelled: Boolean = a.isCancelled || b.isCancelled
+    def cancel(evenIfRunning: Boolean): Boolean =
+      a.cancel(evenIfRunning) || b.cancel(evenIfRunning)
+    def get: C = compute(Long.MaxValue)
+    def get(timeout: Long, units: TimeUnit): C =
+      compute(TimeUnit.NANOSECONDS.convert(timeout, units))
+
+    private def compute(timeoutInNanos: Long): C = cache match {
+      case Some(c) => c
+      case None =>
+        val start = System.nanoTime
+        val ar = a.get(timeoutInNanos, TimeUnit.NANOSECONDS)
+        val stop = System.nanoTime
+        val aTime = stop - start
+        val br = b.get(timeoutInNanos - aTime, TimeUnit.NANOSECONDS)
+        val ret = f(ar, br)
+        cache = Some(ret)
+        ret
+    }
+  }
+
   def asyncF[A, B](f: A => B): A => Par[B] =
     a => lazyUnit(f(a))
 
@@ -109,6 +138,15 @@ object Par {
       // TODO (fluency03): why using fork here?
       case x :: xs => map2(x, fork(sequenceRecursive(xs)))(_ :: _)
     }
+
+//  def sequenceBalanced[A](as: IndexedSeq[Par[A]]): Par[IndexedSeq[A]] = fork {
+//    if (as.isEmpty) unit(Vector())
+//    else if (as.length == 1) map(as.head)(a => Vector(a))
+//    else {
+//      val (l,r) = as.splitAt(as.length/2)
+//      map2(sequenceBalanced(l), sequenceBalanced(r))(_ ++ _)
+//    }
+//  }
 
   // TODO (fluency03): difference of using fork outside vs using fork on recursion as above?
   def sequenceBalanced[A](as: IndexedSeq[Par[A]]): Par[IndexedSeq[A]] = fork {
@@ -140,43 +178,40 @@ object Par {
     map(sequence(pars))(_.flatten) // convenience method on `List` for concatenating a list of lists
   }
 
+  def parallel[IN, ACC](ints: IndexedSeq[IN], init: IN)(g: IN => ACC)(f: (ACC, ACC) => ACC): Par[ACC] =
+    if (ints.length <= 1)
+      unit(g(ints.headOption getOrElse init))
+    else {
+      val (l, r) = ints.splitAt(ints.length / 2)
+      map2(fork(parallel(l, init)(g)(f)), fork(parallel(r, init)(g)(f)))(f)
+    }
+
+  def max(ints: IndexedSeq[Int]): Par[Int] =
+    parallel[Int, Int](ints, Integer.MIN_VALUE)(i => i)(_ max _)
+
+  def countWords(l: List[String]): Par[Int] =
+    parallel(l.toIndexedSeq, "") {
+      case "" => 0
+      case s@String => s.split(" ").length
+      case _ => 0
+    }(_ + _)
+
+  def map3[A, B, C, D](a: Par[A], b: Par[B], c: Par[C])(f: (A, B, C) => D): Par[D] = ???
+
+
+  def map4[A, B, C, D, E](a: Par[A], b: Par[B], c: Par[C], d: Par[D])(f: (A, B, C, D) => E): Par[E] = ???
+
+
+  def map5[A, B, C, D, E, F](a: Par[A], b: Par[B], c: Par[C], d: Par[D], e: Par[E])(f: (A, B, C, D, E) => F): Par[F] = ???
+
+
   def equal[A](e: ExecutorService)(p: Par[A], p2: Par[A]): Boolean =
     p(e).get == p2(e).get
 
 
 
 
-
-
-
-
 }
 
-/**
- * Note: this implementation will not prevent repeated evaluation if multiple threads call `get` in parallel.
- * We could prevent this using synchronization, but it isn't needed for our purposes here
- * (also, repeated evaluation of pure values won't affect results).
- */
-case class Map2Future[A, B, C](a: Future[A], b: Future[B], f: (A,B) => C) extends Future[C] {
-  @volatile var cache: Option[C] = None
-  def isDone: Boolean = cache.isDefined
-  def isCancelled: Boolean = a.isCancelled || b.isCancelled
-  def cancel(evenIfRunning: Boolean): Boolean =
-    a.cancel(evenIfRunning) || b.cancel(evenIfRunning)
-  def get: C = compute(Long.MaxValue)
-  def get(timeout: Long, units: TimeUnit): C =
-    compute(TimeUnit.NANOSECONDS.convert(timeout, units))
 
-  private def compute(timeoutInNanos: Long): C = cache match {
-    case Some(c) => c
-    case None =>
-      val start = System.nanoTime
-      val ar = a.get(timeoutInNanos, TimeUnit.NANOSECONDS)
-      val stop = System.nanoTime
-      val aTime = stop - start
-      val br = b.get(timeoutInNanos - aTime, TimeUnit.NANOSECONDS)
-      val ret = f(ar, br)
-      cache = Some(ret)
-      ret
-  }
-}
+

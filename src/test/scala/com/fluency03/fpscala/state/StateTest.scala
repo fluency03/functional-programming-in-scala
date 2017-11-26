@@ -1,8 +1,8 @@
-package com.fluency03.fpscala.laziness
+package com.fluency03.fpscala.state
 
 import org.scalatest._
 
-class StreamTest extends FlatSpec with Matchers {
+class StateTest extends FlatSpec with Matchers {
 
   "" should "" in {
     pending
@@ -23,6 +23,7 @@ class StreamTest extends FlatSpec with Matchers {
   "" should "" in {
     pending
   }
+
 
 
 
