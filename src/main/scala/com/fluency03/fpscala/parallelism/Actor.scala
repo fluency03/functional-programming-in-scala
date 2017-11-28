@@ -3,6 +3,10 @@ package com.fluency03.fpscala.parallelism
 import java.util.concurrent.{Callable, ExecutorService}
 import java.util.concurrent.atomic.{AtomicInteger, AtomicReference}
 
+/**
+ * https://github.com/fpinscala/fpinscala/blob/master/answers/src/main/scala/fpinscala/parallelism/Actor.scala
+ */
+
 /*
  * Implementation is taken from `scalaz` library, with only minor changes. See:
  *
@@ -12,10 +16,6 @@ import java.util.concurrent.atomic.{AtomicInteger, AtomicReference}
  * and is licensed using 3-clause BSD, see LICENSE file at:
  *
  * https://github.com/scalaz/scalaz/blob/scalaz-seven/etc/LICENCE
- */
-
-/**
- * https://github.com/fpinscala/fpinscala/blob/master/answers/src/main/scala/fpinscala/parallelism/Actor.scala
  */
 
 /**
@@ -62,7 +62,8 @@ final class Actor[A](strategy: Strategy)(handler: A => Unit, onError: Throwable 
   }
 
   private def trySchedule() {
-    if (suspended.compareAndSet(1, 0)) schedule()
+    if (suspended.compareAndSet(1, 0))
+      schedule()
   }
 
   private def schedule() {
@@ -121,7 +122,6 @@ object Actor {
 }
 
 object Strategy {
-
   /**
    * We can create a `Strategy` from any `ExecutorService`. It's a little more
    * convenient than submitting `Callable` objects directly.

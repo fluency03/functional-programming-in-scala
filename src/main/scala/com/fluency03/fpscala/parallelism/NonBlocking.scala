@@ -61,7 +61,49 @@ object NonBlocking {
         def call: Unit = r
       })
 
-    def map2[A, B, C](a: Par[A], b: Par[B])(f: (A, B) => C): Par[C] = ???
+    /**
+     * Helper function for constructing `Par` values out of calls to non-blocking
+     * continuation-passing-style APIs.
+     */
+    def async[A](f: (A => Unit) => Unit): Par[A] =
+      _ => new Future[A] {
+        def apply(k: A => Unit): Unit = f(k)
+      }
+
+    def map2[A, B, C](p: Par[A], p2: Par[B])(f: (A, B) => C): Par[C] =
+      (es: ExecutorService) => new Future[C] {
+        def apply(cb: C => Unit): Unit = {
+          // Two mutable vars are used to store the two results.
+          var ar: Option[A] = None
+          var br: Option[B] = None
+          // this implementation is a little too liberal in forking of threads -
+          // it forks a new logical thread for the actor and for stack-safety,
+          // forks evaluation of the callback `cb`
+
+          // An actor that awaits both results, combines them with f, and passes the result to cb.
+          val actor = Actor[Either[A, B]](es) {
+            // If the A result came in first, stores it in ar and waits for the B.
+            // If the A result came last and we already have our B, calls f with both
+            // results and passes the resulting C to the callback, cb.
+            case Left(a) =>
+              if (br.isDefined) eval(es)(cb(f(a, br.get)))
+              else ar = Some(a)
+            // Analogously, if the B result came in first, stores it in br and waits for the A.
+            // If the B result came last and we already have our A, calls f with both results
+            // and passes the resulting C to the callback, cb.
+            case Right(b) =>
+              if (ar.isDefined) eval(es)(cb(f(ar.get, b)))
+              else br = Some(b)
+          }
+
+          // Passes the actor as a continuation to both sides.
+          // On the A side, we wrap the result in Left, and on the B side, we wrap it in Right.
+          // These are the constructors of the Either data type, and they serve to indicate
+          // to the actor where the result came from.
+          p(es)(a => actor ! Left(a))
+          p2(es)(b => actor ! Right(b))
+        }
+      }
 
 
 
