@@ -3,6 +3,11 @@ package com.fluency03.fpscala.parallelism
 import java.util.concurrent._
 import java.util.concurrent.atomic.AtomicReference
 
+/**
+ * A representation of Par that doesn’t leak resources this way has to be non-blocking in the sense
+ * that the implementations of fork and map2 must never call a method that blocks the current thread
+ * like Future.get.
+ */
 object NonBlocking {
 
   sealed trait Future[A] {
@@ -104,6 +109,80 @@ object NonBlocking {
           p2(es)(b => actor ! Right(b))
         }
       }
+
+    def map[A, B](pa: Par[A])(f: A => B): Par[B] = ???
+
+
+
+
+    def sequenceRecursive[A](ps: List[Par[A]]): Par[List[A]] = ???
+
+
+
+
+    def sequenceBalanced[A](as: IndexedSeq[Par[A]]): Par[IndexedSeq[A]] = ???
+
+
+
+
+    def sequence[A](as: List[Par[A]]): Par[List[A]] = ???
+
+
+
+
+    def parMap[A,B](as: List[A])(f: A => B): Par[List[B]] = ???
+
+
+
+
+    def parMap[A,B](as: IndexedSeq[A])(f: A => B): Par[IndexedSeq[B]] = ???
+
+
+
+
+
+
+
+
+
+
+
+
+    def choice[A](cond: Par[Boolean])(t: Par[A], f: Par[A]): Par[A] = ???
+
+
+
+    def choiceN[A](n: Par[Int])(choices: List[Par[A]]): Par[A] = ???
+
+
+    def choiceByChoiceN[A](a: Par[Boolean])(ifTrue: Par[A], ifFalse: Par[A]): Par[A] = ???
+
+
+    def choiceMap[K,V](p: Par[K])(ps: Map[K,Par[V]]): Par[V] = ???
+
+
+    def chooser[A,B](pa: Par[A])(choices: A => Par[B]): Par[B] = ???
+
+
+    def flatMap[A,B](a: Par[A])(f: A => Par[B]): Par[B] = ???
+
+
+    def choiceByFlatMap[A](p: Par[Boolean])(f: Par[A], t: Par[A]): Par[A] = ???
+
+
+
+    def choiceNByFlatMap[A](p: Par[Int])(choices: List[Par[A]]): Par[A] = ???
+
+
+    def join[A](a: Par[Par[A]]): Par[A] = ???
+
+
+    def joinByFlatMap[A](a: Par[Par[A]]): Par[A] = ???
+
+
+
+    def flatMapByJoin[A,B](p: Par[A])(f: A => Par[B]): Par[B] = ???
+
 
 
 

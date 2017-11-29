@@ -44,7 +44,7 @@ object Par {
    * allocated for evaluating bf.
    */
   def map2[A, B, C](a: Par[A], b: Par[B])(f: (A, B) => C): Par[C] =
-    (es: ExecutorService) => {
+    es => {
       val af = a(es)
       val bf = b(es)
       UnitFuture(f(af.get, bf.get))
@@ -54,7 +54,7 @@ object Par {
    * fork marks a computation for concurrent evaluation. The evaluation won’t actually occur until forced by run.
    */
   def fork[A](a: => Par[A]): Par[A] =
-    (es: ExecutorService) => es.submit(new Callable[A] {
+    es => es.submit(new Callable[A] {
       def call: A = a(es).get
     })
 
@@ -211,16 +211,42 @@ object Par {
   def delay[A](fa: => Par[A]): Par[A] =
     es => fa(es)
 
+  // Notice we are blocking on the result of cond.
+  def choice[A](cond: Par[Boolean])(t: Par[A], f: Par[A]): Par[A] =
+    es => if (run(es)(cond).get) t(es) else f(es)
+
+
+  def choiceN[A](n: Par[Int])(choices: List[Par[A]]): Par[A] = ???
 
 
 
+  def choiceByChoiceN[A](a: Par[Boolean])(ifTrue: Par[A], ifFalse: Par[A]): Par[A] = ???
+
+
+  def choiceMap[K,V](p: Par[K])(ps: Map[K,Par[V]]): Par[V] = ???
+
+
+  def chooser[A,B](pa: Par[A])(choices: A => Par[B]): Par[B] = ???
+
+
+  def flatMap[A,B](a: Par[A])(f: A => Par[B]): Par[B] = ???
+
+
+  def choiceByFlatMap[A](p: Par[Boolean])(f: Par[A], t: Par[A]): Par[A] = ???
 
 
 
+  def choiceNByFlatMap[A](p: Par[Int])(choices: List[Par[A]]): Par[A] = ???
+
+
+  def join[A](a: Par[Par[A]]): Par[A] = ???
+
+
+  def joinByFlatMap[A](a: Par[Par[A]]): Par[A] = ???
 
 
 
-
+  def flatMapByJoin[A,B](p: Par[A])(f: A => Par[B]): Par[B] = ???
 
 
 }
