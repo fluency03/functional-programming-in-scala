@@ -215,39 +215,35 @@ object Par {
   def choice[A](cond: Par[Boolean])(t: Par[A], f: Par[A]): Par[A] =
     es => if (run(es)(cond).get) t(es) else f(es)
 
+  def choiceN[A](n: Par[Int])(choices: List[Par[A]]): Par[A] =
+    es => run(es)(choices(run(es)(n).get))
 
-  def choiceN[A](n: Par[Int])(choices: List[Par[A]]): Par[A] = ???
+  def choiceByChoiceN[A](a: Par[Boolean])(ifTrue: Par[A], ifFalse: Par[A]): Par[A] =
+    choiceN(map(a)(b => if (b) 1 else 0))(List(ifFalse, ifTrue))
 
+  def choiceMap[K, V](p: Par[K])(ps: Map[K,Par[V]]): Par[V] =
+    es => run(es)(ps(run(es)(p).get))
 
+  def chooser[A, B](pa: Par[A])(choices: A => Par[B]): Par[B] =
+    es => run(es)(choices(run(es)(pa).get))
 
-  def choiceByChoiceN[A](a: Par[Boolean])(ifTrue: Par[A], ifFalse: Par[A]): Par[A] = ???
+  def flatMap[A, B](a: Par[A])(f: A => Par[B]): Par[B] =
+    es => run(es)(f(run(es)(a).get))
 
+  def choiceByFlatMap[A](p: Par[Boolean])(f: Par[A], t: Par[A]): Par[A] =
+    flatMap(p)(b => if (b) t else f)
 
-  def choiceMap[K,V](p: Par[K])(ps: Map[K,Par[V]]): Par[V] = ???
+  def choiceNByFlatMap[A](p: Par[Int])(choices: List[Par[A]]): Par[A] =
+    flatMap(p)(i => choices(i))
 
+  def join[A](a: Par[Par[A]]): Par[A] =
+    es => run(es)(run(es)(a).get())
 
-  def chooser[A,B](pa: Par[A])(choices: A => Par[B]): Par[B] = ???
+  def joinByFlatMap[A](a: Par[Par[A]]): Par[A] =
+    flatMap(a)(p => p)
 
-
-  def flatMap[A,B](a: Par[A])(f: A => Par[B]): Par[B] = ???
-
-
-  def choiceByFlatMap[A](p: Par[Boolean])(f: Par[A], t: Par[A]): Par[A] = ???
-
-
-
-  def choiceNByFlatMap[A](p: Par[Int])(choices: List[Par[A]]): Par[A] = ???
-
-
-  def join[A](a: Par[Par[A]]): Par[A] = ???
-
-
-  def joinByFlatMap[A](a: Par[Par[A]]): Par[A] = ???
-
-
-
-  def flatMapByJoin[A,B](p: Par[A])(f: A => Par[B]): Par[B] = ???
-
+  def flatMapByJoin[A, B](p: Par[A])(f: A => Par[B]): Par[B] =
+    join(map(p)(f))
 
 }
 

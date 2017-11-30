@@ -142,14 +142,13 @@ object NonBlocking {
     def sequence[A](as: List[Par[A]]): Par[List[A]] =
       map(sequenceBalanced(as.toIndexedSeq))(_.toList)
 
-    def parMap[A,B](as: List[A])(f: A => B): Par[List[B]] =
+    def parMap[A, B](as: List[A])(f: A => B): Par[List[B]] =
       sequence(as.map(asyncF(f)))
 
-    def parMap[A,B](as: IndexedSeq[A])(f: A => B): Par[IndexedSeq[B]] =
+    def parMap[A, B](as: IndexedSeq[A])(f: A => B): Par[IndexedSeq[B]] =
       sequenceBalanced(as.map(asyncF(f)))
 
     def choice[A](cond: Par[Boolean])(t: Par[A], f: Par[A]): Par[A] = ???
-
 
 
     def choiceN[A](n: Par[Int])(choices: List[Par[A]]): Par[A] = ???
@@ -158,13 +157,13 @@ object NonBlocking {
     def choiceByChoiceN[A](a: Par[Boolean])(ifTrue: Par[A], ifFalse: Par[A]): Par[A] = ???
 
 
-    def choiceMap[K,V](p: Par[K])(ps: Map[K,Par[V]]): Par[V] = ???
+    def choiceMap[K, V](p: Par[K])(ps: Map[K,Par[V]]): Par[V] = ???
 
 
-    def chooser[A,B](pa: Par[A])(choices: A => Par[B]): Par[B] = ???
+    def chooser[A, B](pa: Par[A])(choices: A => Par[B]): Par[B] = ???
 
 
-    def flatMap[A,B](a: Par[A])(f: A => Par[B]): Par[B] = ???
+    def flatMap[A, B](a: Par[A])(f: A => Par[B]): Par[B] = ???
 
 
     def choiceByFlatMap[A](p: Par[Boolean])(f: Par[A], t: Par[A]): Par[A] = ???
@@ -181,7 +180,7 @@ object NonBlocking {
 
 
 
-    def flatMapByJoin[A,B](p: Par[A])(f: A => Par[B]): Par[B] = ???
+    def flatMapByJoin[A, B](p: Par[A])(f: A => Par[B]): Par[B] = ???
 
 
 
