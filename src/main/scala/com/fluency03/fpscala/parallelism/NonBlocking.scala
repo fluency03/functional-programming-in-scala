@@ -117,6 +117,12 @@ object NonBlocking {
         }
       }
 
+    def lazyUnit[A](a: => A): Par[A] =
+      fork(unit(a))
+
+    def asyncF[A,B](f: A => B): A => Par[B] =
+      a => lazyUnit(f(a))
+
     def sequenceRecursive[A](ps: List[Par[A]]): Par[List[A]] =
       ps match {
         case Nil => unit(Nil)
@@ -136,23 +142,11 @@ object NonBlocking {
     def sequence[A](as: List[Par[A]]): Par[List[A]] =
       map(sequenceBalanced(as.toIndexedSeq))(_.toList)
 
-    def parMap[A,B](as: List[A])(f: A => B): Par[List[B]] = ???
+    def parMap[A,B](as: List[A])(f: A => B): Par[List[B]] =
+      sequence(as.map(asyncF(f)))
 
-
-
-
-    def parMap[A,B](as: IndexedSeq[A])(f: A => B): Par[IndexedSeq[B]] = ???
-
-
-
-
-
-
-
-
-
-
-
+    def parMap[A,B](as: IndexedSeq[A])(f: A => B): Par[IndexedSeq[B]] =
+      sequenceBalanced(as.map(asyncF(f)))
 
     def choice[A](cond: Par[Boolean])(t: Par[A], f: Par[A]): Par[A] = ???
 
