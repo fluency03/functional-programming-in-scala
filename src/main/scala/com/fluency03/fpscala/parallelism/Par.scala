@@ -151,8 +151,8 @@ object Par {
   // TODO (fluency03): difference of using fork outside vs using fork on recursion as above?
   def sequenceBalanced[A](as: IndexedSeq[Par[A]]): Par[IndexedSeq[A]] = fork {
     as match {
-      case IndexedSeq() => unit(IndexedSeq())
-      case IndexedSeq(one) => map(one)(IndexedSeq(_))
+      case IndexedSeq() => unit(Vector())
+      case IndexedSeq(one) => map(one)(Vector(_))
       case _ +: _ =>
         val (l, r) = as.splitAt(as.length / 2)
         map2(sequenceBalanced(l), sequenceBalanced(r))(_ ++ _)

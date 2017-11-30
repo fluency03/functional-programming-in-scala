@@ -76,7 +76,7 @@ object NonBlocking {
       }
 
     def map2[A, B, C](p: Par[A], p2: Par[B])(f: (A, B) => C): Par[C] =
-      (es: ExecutorService) => new Future[C] {
+      es => new Future[C] {
         def apply(cb: C => Unit): Unit = {
           // Two mutable vars are used to store the two results.
           var ar: Option[A] = None
@@ -110,25 +110,31 @@ object NonBlocking {
         }
       }
 
-    def map[A, B](pa: Par[A])(f: A => B): Par[B] = ???
+    def map[A, B](pa: Par[A])(f: A => B): Par[B] =
+      es => new Future[B] {
+        def apply(cb: B => Unit): Unit = {
+          pa(es)(a => eval(es) {cb(f(a)) })
+        }
+      }
 
+    def sequenceRecursive[A](ps: List[Par[A]]): Par[List[A]] =
+      ps match {
+        case Nil => unit(Nil)
+        case x :: xs => map2(x, fork(sequenceRecursive(xs)))(_ :: _)
+      }
 
+    def sequenceBalanced[A](as: IndexedSeq[Par[A]]): Par[IndexedSeq[A]] = fork {
+      as match {
+        case IndexedSeq() => unit(Vector())
+        case IndexedSeq(one) => map(one)(Vector(_))
+        case _ +: _ =>
+          val (l, r) = as.splitAt(as.length / 2)
+          map2(sequenceBalanced(l), sequenceBalanced(r))(_ ++ _)
+      }
+    }
 
-
-    def sequenceRecursive[A](ps: List[Par[A]]): Par[List[A]] = ???
-
-
-
-
-    def sequenceBalanced[A](as: IndexedSeq[Par[A]]): Par[IndexedSeq[A]] = ???
-
-
-
-
-    def sequence[A](as: List[Par[A]]): Par[List[A]] = ???
-
-
-
+    def sequence[A](as: List[Par[A]]): Par[List[A]] =
+      map(sequenceBalanced(as.toIndexedSeq))(_.toList)
 
     def parMap[A,B](as: List[A])(f: A => B): Par[List[B]] = ???
 
