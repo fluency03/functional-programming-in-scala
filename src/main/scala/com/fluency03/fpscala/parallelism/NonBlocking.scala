@@ -148,45 +148,74 @@ object NonBlocking {
     def parMap[A, B](as: IndexedSeq[A])(f: A => B): Par[IndexedSeq[B]] =
       sequenceBalanced(as.map(asyncF(f)))
 
-    def choice[A](cond: Par[Boolean])(t: Par[A], f: Par[A]): Par[A] = ???
+    /*
+     * We can implement `choice` as a new primitive.
+     *
+     * `p(es)(result => ...)` for some `ExecutorService`, `es`, and
+     * some `Par`, `p`, is the idiom for running `p`, and registering
+     * a callback to be invoked when its result is available. The
+     * result will be bound to `result` in the function passed to
+     * `p(es)`.
+     *
+     * If you find this code difficult to follow, you may want to
+     * write down the type of each subexpression and follow the types
+     * through the implementation. What is the type of `p(es)`? What
+     * about `t(es)`? What about `t(es)(cb)`?
+     */
+    def choice[A](cond: Par[Boolean])(t: Par[A], f: Par[A]): Par[A] =
+      es => new Future[A] {
+        def apply(cb: A => Unit): Unit =
+          cond(es)(b =>
+            if (b) eval(es) { t(es)(cb) }
+            else eval(es) { f(es)(cb) }
+          )
+      }
 
+    def choiceN[A](n: Par[Int])(choices: List[Par[A]]): Par[A] =
+      es => new Future[A] {
+        def apply(cb: A => Unit): Unit =
+          n(es) {index => eval(es) { choices(index)(es)(cb) }}
+      }
 
-    def choiceN[A](n: Par[Int])(choices: List[Par[A]]): Par[A] = ???
+    def choiceByChoiceN[A](a: Par[Boolean])(ifTrue: Par[A], ifFalse: Par[A]): Par[A] =
+      choiceN(map(a)(b => if (b) 1 else 0))(List(ifFalse, ifTrue))
 
+    def choiceMap[K, V](p: Par[K])(ps: Map[K, Par[V]]): Par[V] =
+      es => new Future[V] {
+        def apply(cb: V => Unit): Unit =
+          p(es)(k => ps(k)(es)(cb))
+      }
 
-    def choiceByChoiceN[A](a: Par[Boolean])(ifTrue: Par[A], ifFalse: Par[A]): Par[A] = ???
+    def chooser[A, B](pa: Par[A])(choices: A => Par[B]): Par[B] =
+      es => new Future[B] {
+        def apply(cb: B => Unit): Unit =
+          pa(es)(a => choices(a)(es)(cb))
+      }
 
+    def flatMap[A, B](a: Par[A])(f: A => Par[B]): Par[B] =
+      es => new Future[B] {
+        def apply(cb: B => Unit): Unit =
+          a(es)(k => f(k)(es)(cb))
+      }
 
-    def choiceMap[K, V](p: Par[K])(ps: Map[K,Par[V]]): Par[V] = ???
+    def choiceByFlatMap[A](p: Par[Boolean])(f: Par[A], t: Par[A]): Par[A] =
+      flatMap(p)(b => if (b) t else f)
 
+    def choiceNByFlatMap[A](p: Par[Int])(choices: List[Par[A]]): Par[A] =
+      flatMap(p)(i => choices(i))
 
-    def chooser[A, B](pa: Par[A])(choices: A => Par[B]): Par[B] = ???
+    def join[A](a: Par[Par[A]]): Par[A] =
+      es => new Future[A] {
+        def apply(cb: A => Unit): Unit =
+          a(es)(pa => eval(es) { pa(es)(cb) })
+      }
 
+    def joinByFlatMap[A](a: Par[Par[A]]): Par[A] =
+      flatMap(a)(pa => pa)
 
-    def flatMap[A, B](a: Par[A])(f: A => Par[B]): Par[B] = ???
-
-
-    def choiceByFlatMap[A](p: Par[Boolean])(f: Par[A], t: Par[A]): Par[A] = ???
-
-
-
-    def choiceNByFlatMap[A](p: Par[Int])(choices: List[Par[A]]): Par[A] = ???
-
-
-    def join[A](a: Par[Par[A]]): Par[A] = ???
-
-
-    def joinByFlatMap[A](a: Par[Par[A]]): Par[A] = ???
-
-
-
-    def flatMapByJoin[A, B](p: Par[A])(f: A => Par[B]): Par[B] = ???
-
-
-
-
-
-
+    def flatMapByJoin[A, B](p: Par[A])(f: A => Par[B]): Par[B] =
+      join(map(p)(f))
+    
   }
 
 }

@@ -221,7 +221,7 @@ object Par {
   def choiceByChoiceN[A](a: Par[Boolean])(ifTrue: Par[A], ifFalse: Par[A]): Par[A] =
     choiceN(map(a)(b => if (b) 1 else 0))(List(ifFalse, ifTrue))
 
-  def choiceMap[K, V](p: Par[K])(ps: Map[K,Par[V]]): Par[V] =
+  def choiceMap[K, V](p: Par[K])(ps: Map[K, Par[V]]): Par[V] =
     es => run(es)(ps(run(es)(p).get))
 
   def chooser[A, B](pa: Par[A])(choices: A => Par[B]): Par[B] =
