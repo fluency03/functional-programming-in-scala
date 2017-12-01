@@ -1,7 +1,7 @@
 package com.fluency03.fpscala.parallelism
 
 import java.util.concurrent.{Callable, ExecutorService}
-import java.util.concurrent.atomic.{AtomicInteger, AtomicReference}
+import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
 
 /**
  * https://github.com/fpinscala/fpinscala/blob/master/answers/src/main/scala/fpinscala/parallelism/Actor.scala
@@ -36,13 +36,13 @@ import java.util.concurrent.atomic.{AtomicInteger, AtomicReference}
  *
  * @param handler  The message handler
  * @param onError  Exception handler, called if the message handler throws any `Throwable`.
- * @param strategy Execution strategy, for example, a strategy that is backed by an `ExecutorService`
+ * @param strategy Execution strateg§y, for example, a strategy that is backed by an `ExecutorService`
  * @tparam A       The type of messages accepted by this actor.
  */
 final class Actor[A](strategy: Strategy)(handler: A => Unit, onError: Throwable => Unit = throw _) {
 
   private val tail = new AtomicReference(new Node[A]())
-  private val suspended = new AtomicInteger(1)
+  private val suspended = new AtomicBoolean(true)
   private val head = new AtomicReference(tail.get)
 
   /**
@@ -62,7 +62,7 @@ final class Actor[A](strategy: Strategy)(handler: A => Unit, onError: Throwable 
   }
 
   private def trySchedule() {
-    if (suspended.compareAndSet(1, 0))
+    if (suspended.compareAndSet(true, false))
       schedule()
   }
 
@@ -78,7 +78,7 @@ final class Actor[A](strategy: Strategy)(handler: A => Unit, onError: Throwable 
       tail.lazySet(n)
       schedule()
     } else {
-      suspended.set(1)
+      suspended.set(true)
       if (n.get ne null) trySchedule()
     }
   }
@@ -97,7 +97,7 @@ final class Actor[A](strategy: Strategy)(handler: A => Unit, onError: Throwable 
   }
 
   def contramap[B](f: B => A): Actor[B] =
-    new Actor[B](strategy)((b: B) => (this ! f(b)), onError)
+    new Actor[B](strategy)((b: B) => this ! f(b), onError)
 }
 
 private class Node[A](var a: A = null.asInstanceOf[A]) extends AtomicReference[Node[A]]
@@ -128,7 +128,7 @@ object Strategy {
    */
   def fromExecutorService(es: ExecutorService): Strategy = new Strategy {
     def apply[A](a: => A): () => A = {
-      val f = es.submit { new Callable[A] { def call = a} }
+      val f = es.submit { new Callable[A] { def call: A = a} }
       () => f.get
     }
   }

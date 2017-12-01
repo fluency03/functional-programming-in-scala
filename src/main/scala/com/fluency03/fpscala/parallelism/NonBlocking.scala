@@ -215,7 +215,7 @@ object NonBlocking {
 
     def flatMapByJoin[A, B](p: Par[A])(f: A => Par[B]): Par[B] =
       join(map(p)(f))
-    
+
   }
 
 }
