@@ -11,6 +11,7 @@ Remarks and Code for the Book Functional Programming in Scala.
   - CHAPTER 6: Purely functional state - [Source](./src/main/scala/com/fluency03/fpscala/state) | [Test](./src/test/scala/com/fluency03/fpscala/state)
 - **Part 2: Functional design and combinator libraries**
   - CHAPTER 7: Purely functional parallelism - [Source](./src/main/scala/com/fluency03/fpscala/parallelism) | [Test](./src/test/scala/com/fluency03/fpscala/parallelism)
+  - CHAPTER 8: Property-based testing - [Source](./src/main/scala/com/fluency03/fpscala/testing) | [Test](./src/test/scala/com/fluency03/fpscala/testing)
 
 
 
