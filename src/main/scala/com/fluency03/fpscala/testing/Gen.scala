@@ -22,7 +22,15 @@ object Gen {
   def forAll[A](a: Gen[A])(f: A => Boolean): Prop = ???
 
   def choose(start: Int, stopExclusive: Int): Gen[Int] =
-    Gen(State(RNG.nonNegativeInt).map(n => start + n % (stopExclusive-start)))
+    Gen(State(RNG.nonNegativeInt).map(n => start + n % (stopExclusive - start)))
+
+  /* Write choose as an explicit state action, but this is far less
+   convenient, since it requires us to manually thread the `RNG` through the
+   computation. */
+  def choose2(start: Int, stopExclusive: Int): Gen[Int] =
+    Gen(State(rng => RNG.nonNegativeInt(rng) match {
+      case (n, rng2) => (start + n % (stopExclusive - start), rng2)
+    }))
 
   def unit[A](a: => A): Gen[A] = ???
 

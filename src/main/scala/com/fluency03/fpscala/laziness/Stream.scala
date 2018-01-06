@@ -128,7 +128,7 @@ sealed trait Stream[+A] {
       case (Cons(h1, t1), Cons(h2, t2)) => Some(((Some(h1()), Some(h2())), (t1(), t2())))
     }
 
-  def startsWith[A](s: Stream[A]): Boolean =
+  def startsWith[B](s: Stream[B]): Boolean =
     zipWith(s)((a, b) => a == b).forAll(bo => bo)
 
   def tails: Stream[Stream[A]] =

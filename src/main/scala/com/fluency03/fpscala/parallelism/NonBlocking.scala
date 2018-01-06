@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicReference
  */
 object NonBlocking {
 
-  sealed trait Future[A] {
+  sealed trait Future[+A] {
     /**
      * The apply method is declared private to the fpinscala.parallelism package,
      * which means that it can only be accessed by code within that package.

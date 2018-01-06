@@ -19,6 +19,10 @@ Remarks and Code for the Book Functional Programming in Scala.
 Reference: [fpinscala](https://github.com/fpinscala/fpinscala/)
 
 
-
+TODOs:
+- Implement Generator-/Property-style testing
+- Source progress: CHAPTER 8: Property-based testing
+- Test progress: CHAPTER 5: Strictness and laziness
+- ...
 
 

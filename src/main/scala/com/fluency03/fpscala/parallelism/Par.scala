@@ -192,7 +192,7 @@ object Par {
   def countWords(l: List[String]): Par[Int] =
     parallel(l.toIndexedSeq, "") {
       case "" => 0
-      case s@String => s.split(" ").length
+      case s: String => s.split(" ").length
       case _ => 0
     }(_ + _)
 
