@@ -36,6 +36,28 @@ class StreamTest extends FlatSpec with Matchers with BeforeAndAfter {
     twoCons.t should equal(nonEmptyTail)
   }
 
+  "cons" should "concentrate a head and a tail to a Stream." in {
+    val cons1 = Stream.cons(1, emptyStream)
+    cons1 shouldBe a [Stream[_]]
+    cons1 shouldBe a [Cons[_]]
+    val newCons = cons1.asInstanceOf[Cons[Int]]
+    newCons.headOption should equal(Some(1))
+    newCons.t() should equal(emptyStream)
+  }
+
+  "apply" should "be able to construct a new Stream." in {
+    Stream() should equal(Empty)
+    val s = Stream(3, 2, 1)
+    s shouldBe a [Stream[_]]
+    s shouldBe a [Cons[_]]
+    val newCons = s.asInstanceOf[Cons[Int]]
+    newCons.headOption should equal(Some(3))
+    newCons.t().headOption should equal(Some(2))
+    val subCons = newCons.t().asInstanceOf[Cons[Int]]
+    subCons.t().headOption should equal(Some(1))
+    s.toList should equal(List(3, 2, 1))
+  }
+
   "headOption" should "return the Option version of the Stream head." in {
     Empty.headOption should equal(None)
     singleHeadCons.headOption should equal(Some(1))
@@ -54,9 +76,42 @@ class StreamTest extends FlatSpec with Matchers with BeforeAndAfter {
     twoCons.toListFast should equal(List(2, 1))
   }
 
-  "d" should "" in {
-    pending
+  "take" should "return the first n element from a Stream." in {
+    Empty.take(0) should equal(Empty)
+    Empty.take(1) should equal(Empty)
+    singleHeadCons.take(0) should equal(Empty)
+    singleHeadCons.take(1).toList should equal(List(1))
+    twoCons.take(0) should equal(Empty)
+    twoCons.take(1).toList should equal(List(2))
+    twoCons.take(2).toList should equal(List(2, 1))
+    Stream(3, 2, 1).take(2).toList should equal(List(3, 2))
   }
+
+  "drop" should "drop the first n element from a Stream." in {
+    Empty.drop(0) should equal(Empty)
+    Empty.drop(1) should equal(Empty)
+    singleHeadCons.drop(0) should equal(singleHeadCons)
+    singleHeadCons.drop(1) should equal(Empty)
+    twoCons.drop(0) should equal(twoCons)
+    twoCons.drop(1) should equal(singleHeadCons)
+    twoCons.drop(2) should equal(Empty)
+    Stream(3, 2, 1).drop(2).toList should equal(List(1))
+  }
+
+  "takeWhile" should "return all starting elements of a Stream that match the given predicate." in {
+    val p0 = (n: Int) => n >= 1
+    Empty.takeWhile(p0) should equal(Empty)
+    singleHeadCons.takeWhile(_ < 1) should equal(Empty)
+    singleHeadCons.takeWhile(p0).toList should equal(List(1))
+    twoCons.takeWhile(_ > 2) should equal(Empty)
+    twoCons.takeWhile(_ > 1).toList should equal(List(2))
+    twoCons.takeWhile(p0).toList should equal(List(2, 1))
+    Stream(3, 2, 1).takeWhile(_ > 1).toList should equal(List(3, 2))
+  }
+
+
+
+
 
 
 
