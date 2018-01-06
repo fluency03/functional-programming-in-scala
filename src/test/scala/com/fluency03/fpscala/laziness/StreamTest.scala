@@ -62,6 +62,10 @@ class StreamTest extends FlatSpec with Matchers with BeforeAndAfter {
     Empty.headOption should equal(None)
     singleHeadCons.headOption should equal(Some(1))
     twoCons.headOption should equal(Some(2))
+
+    Empty.headOptionByFoldRight should equal(None)
+    singleHeadCons.headOptionByFoldRight should equal(Some(1))
+    twoCons.headOptionByFoldRight should equal(Some(2))
   }
 
   "toList" should "return the List version of a Stream" in {
@@ -85,6 +89,15 @@ class StreamTest extends FlatSpec with Matchers with BeforeAndAfter {
     twoCons.take(1).toList should equal(List(2))
     twoCons.take(2).toList should equal(List(2, 1))
     Stream(3, 2, 1).take(2).toList should equal(List(3, 2))
+
+    Empty.takeByUnfold(0) should equal(Empty)
+    Empty.takeByUnfold(1) should equal(Empty)
+    singleHeadCons.takeByUnfold(0) should equal(Empty)
+    singleHeadCons.takeByUnfold(1).toList should equal(List(1))
+    twoCons.takeByUnfold(0) should equal(Empty)
+    twoCons.takeByUnfold(1).toList should equal(List(2))
+    twoCons.takeByUnfold(2).toList should equal(List(2, 1))
+    Stream(3, 2, 1).takeByUnfold(2).toList should equal(List(3, 2))
   }
 
   "drop" should "drop the first n element from a Stream." in {
@@ -107,9 +120,41 @@ class StreamTest extends FlatSpec with Matchers with BeforeAndAfter {
     twoCons.takeWhile(_ > 1).toList should equal(List(2))
     twoCons.takeWhile(p0).toList should equal(List(2, 1))
     Stream(3, 2, 1).takeWhile(_ > 1).toList should equal(List(3, 2))
+
+    Empty.takeWhileByFoldRight(p0) should equal(Empty)
+    singleHeadCons.takeWhileByFoldRight(_ < 1) should equal(Empty)
+    singleHeadCons.takeWhileByFoldRight(p0).toList should equal(List(1))
+    twoCons.takeWhileByFoldRight(_ > 2) should equal(Empty)
+    twoCons.takeWhileByFoldRight(_ > 1).toList should equal(List(2))
+    twoCons.takeWhileByFoldRight(p0).toList should equal(List(2, 1))
+    Stream(3, 2, 1).takeWhileByFoldRight(_ > 1).toList should equal(List(3, 2))
+
+    Empty.takeWhileByUnfold(p0) should equal(Empty)
+    singleHeadCons.takeWhileByUnfold(_ < 1) should equal(Empty)
+    singleHeadCons.takeWhileByUnfold(p0).toList should equal(List(1))
+    twoCons.takeWhileByUnfold(_ > 2) should equal(Empty)
+    twoCons.takeWhileByUnfold(_ > 1).toList should equal(List(2))
+    twoCons.takeWhileByUnfold(p0).toList should equal(List(2, 1))
+    Stream(3, 2, 1).takeWhileByUnfold(_ > 1).toList should equal(List(3, 2))
   }
 
+  "exists" should "checks whether an element matching a Boolean function exists." in {
+    Empty.exists(_ == 1) should equal(false)
+    singleHeadCons.exists(_ < 1) should equal(false)
+    singleHeadCons.exists(_ == 1) should equal(true)
+    twoCons.exists(_ > 2) should equal(false)
+    twoCons.exists(_ > 1) should equal(true)
+    twoCons.exists(_ == 1) should equal(true)
+    Stream(3, 2, 1).exists(_ > 1) should equal(true)
 
+    Empty.existsByFoldRight(_ == 1) should equal(false)
+    singleHeadCons.existsByFoldRight(_ < 1) should equal(false)
+    singleHeadCons.existsByFoldRight(_ == 1) should equal(true)
+    twoCons.existsByFoldRight(_ > 2) should equal(false)
+    twoCons.existsByFoldRight(_ > 1) should equal(true)
+    twoCons.existsByFoldRight(_ == 1) should equal(true)
+    Stream(3, 2, 1).existsByFoldRight(_ > 1) should equal(true)
+  }
 
 
 
