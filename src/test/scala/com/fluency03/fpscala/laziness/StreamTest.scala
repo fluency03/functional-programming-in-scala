@@ -156,7 +156,19 @@ class StreamTest extends FlatSpec with Matchers with BeforeAndAfter {
     Stream(3, 2, 1).existsByFoldRight(_ > 1) should equal(true)
   }
 
+  "foldRight" should "apply a fold function on a Stream, from right." in {
+    Empty.foldRight(1)((a: Int, b) => a + b) should equal(1)
+    singleHeadCons.foldRight(1)((a: Int, b) => a + b) should equal(2)
+    singleHeadCons.foldRight(0)((a: Int, b) => a + b) should equal(1)
+    twoCons.foldRight(1)((a: Int, b) => a + b) should equal(4)
+    Stream(3, 2, 1).foldRight(1)((a: Int, b) => a + b) should equal(7)
 
+    Empty.foldRight(List(1))((a: Int, b) => a :: b) should equal(List(1))
+    singleHeadCons.foldRight(List(0))((a: Int, b) => a :: b) should equal(List(1, 0))
+    singleHeadCons.foldRight(List(1))((a: Int, b) => a :: b) should equal(List(1, 1))
+    twoCons.foldRight(List(1))((a: Int, b) => a :: b) should equal(List(2, 1, 1))
+    Stream(3, 2, 1).foldRight(List(1))((a: Int, b) => a :: b) should equal(List(3, 2, 1, 1))
+  }
 
 
 
